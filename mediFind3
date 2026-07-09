@@ -1,0 +1,103 @@
+# Implementation Plan - Architecture Refactor & Standout CV Features
+
+This plan aims to restructure the MediFind codebase to adhere to production-grade software engineering standards. Clean, modular react code and a separated API services layer are the most immediate indicators of a strong developer during placement rounds.
+
+---
+
+## User Review Required
+
+> [!NOTE]
+> Review the architectural changes and the suggested resume-boosting features below. We will execute them step-by-step once approved.
+
+### 1. Proposed Standout CV Features (Suggestions to Add)
+To make this project stand out to technical interviewers at top product and services companies, we propose adding the following full-stack features:
+- **A. Real-Time Socket.io Chat Drawer (Customer ↔ Pharmacy):**
+  - Add a live chat tab/widget during active emergency deliveries or reservation pickups.
+  - Allows customers to send instant queries (e.g., "Can I collect in 30 minutes?") directly to the pharmacy shop, showing masteries over WebSocket communication.
+- **B. Geolocation Route & ETA Drawer:**
+  - Enhance the Leaflet map in the split-screen view to render a simple navigation line from the customer coordinate to the selected pharmacy.
+  - Compute and print estimated pickup/arrival travel times based on distance.
+- **C. CSV Stock Import/Export:**
+  - Let pharmacy owners upload a CSV file with columns `Name, Brand, Price, Stock, Category` to batch-populate inventory rather than entering them manually.
+
+### 2. Architectural Refactoring Strategy
+
+```mermaid
+graph TD
+    A[App.jsx] --> B[client/src/services/api.js]
+    A --> C[client/src/pages/]
+    C --> D[LandingPage.jsx]
+    C --> E[CustomerDashboard.jsx]
+    C --> F[PharmacyDashboard.jsx]
+    
+    subgraph UI Shared Components
+        G[components/ui/Modal.jsx]
+        H[components/ui/QuantityStepper.jsx]
+        I[components/ui/StatusBadge.jsx]
+    end
+
+    subgraph Feature Components
+        J[components/MedicineCard.jsx]
+        K[components/OcrScanner.jsx]
+    end
+
+    D --> J
+    D --> G
+    E --> K
+    E --> G
+    E --> H
+```
+
+---
+
+## Proposed Changes
+
+### Component 1: API Service Layer
+Extract all inline `axios.get/post/put/delete` endpoints into a clean, unified API service layer.
+
+#### [NEW] [api.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/services/api.js)
+Define unified methods for request routing:
+- `authService` (`login`, `register`, `getMe`)
+- `medicineService` (`search`, `add`, `delete`, `updateStock`)
+- `reservationService` (`getMy`, `create`, `cancel`, `updateStatus`)
+- `orderService` (`getMy`, `create`, `updateStatus`)
+- `prescriptionService` (`getMy`, `upload`, `updateStatus`)
+
+---
+
+### Component 2: Shared UI Components
+Create reusable primitive blocks to eliminate copy-pasted layout markup.
+
+#### [NEW] [Modal.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/components/ui/Modal.jsx)
+Extract a generic modal container handling the overlay backdrop clicks and fade-in animations.
+
+#### [NEW] [QuantityStepper.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/components/ui/QuantityStepper.jsx)
+Extract low-level quantity logic (+ / - limits) to a reusable component.
+
+#### [NEW] [StatusBadge.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/components/ui/StatusBadge.jsx)
+Standardize reservation/order status colors across the client workspace.
+
+---
+
+### Component 3: Page Decomposition
+Decompose large page components into focused sub-components.
+
+#### [NEW] [MedicineCard.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/components/MedicineCard.jsx)
+Extract the signature prescription label card rendering out of `LandingPage.jsx`.
+
+#### [MODIFY] [LandingPage.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/LandingPage.jsx)
+Refactor search states to utilize `medicineService` and import `<MedicineCard>` and `<Modal>`.
+
+#### [MODIFY] [CustomerDashboard.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/CustomerDashboard.jsx)
+Break out status lists into sub-components, referencing the shared modal.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Run `npm run build` in the `client/` folder to ensure compilation finishes without import errors.
+
+### Manual Verification
+- Log in and search medicines to confirm results display perfectly.
+- Complete a reservation checkout sequence to verify the services layer coordinates with the API.

@@ -1,0 +1,181 @@
+# Implementation Plan - Medicine Availability & Emergency Pharmacy Finder (MediFind)
+
+This document details the architecture, file structure, database design, API specifications, and premium UI mockups for the **MediFind** MERN application.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **API Key & Database Fail-safes:**
+> - To make this application work instantly without external accounts, the backend will implement a **dual-database mode**. If no MongoDB connection string is provided in `.env`, the server will automatically fallback to an in-memory or file-based local database (JSON-like local store).
+> - For **Cloudinary**, if no credentials are provided, the server will save prescription uploads to a local `uploads/` directory and serve them statically.
+> - For **Google Maps**, we will implement a Leaflet.js-based mapping system styled beautifully as the default/fallback view. It requires no API key, works offline/online, and has gorgeous custom markers. If a Google Maps API Key is provided, the frontend can load the Google Maps API.
+
+---
+
+## Open Questions
+
+> [!NOTE]
+> 1. **Default Login Roles:** Do you want pre-populated accounts for testing each dashboard (Customer, Pharmacy, Admin)? We plan to seed:
+>    - `customer@medifind.com` / `password123`
+>    - `pharmacy@medifind.com` / `password123` (ABC Pharmacy)
+>    - `admin@medifind.com` / `password123`
+> 2. **Emergency Delivery Radius:** Should the app restrict emergency delivery to a certain radius (e.g., 5km or 10km) or show all nearby pharmacies ordered by distance? We plan to calculate distances using the Haversine formula on latitude/longitude and highlight closest ones.
+
+---
+
+## Proposed Changes
+
+We will create a full-stack structure under `c:\Users\anush\OneDrive\Desktop\MediFind` with the following files:
+
+### Root & Backend Component
+
+The backend will run on Express and use Socket.IO for real-time updates.
+
+#### [NEW] [package.json](file:///c:/Users/anush/OneDrive/Desktop/MediFind/package.json)
+Contains backend dependencies: `express`, `cors`, `dotenv`, `jsonwebtoken`, `bcryptjs`, `mongoose`, `multer`, `cloudinary`, `socket.io`, `nodemon`.
+
+#### [NEW] [server.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/server.js)
+Sets up the Express app, HTTP server, Socket.IO, static files, local database fallback, and routes.
+
+#### [NEW] [.env.example](file:///c:/Users/anush/OneDrive/Desktop/MediFind/.env.example)
+Example environment variables file.
+
+#### [NEW] [config/db.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/config/db.js)
+Handles connection to MongoDB with clean console logging and fallback to local JSON database storage if no connection string is provided.
+
+#### [NEW] [models/User.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/models/User.js)
+MongoDB Schema for User (Customer, Pharmacy, Admin details).
+
+#### [NEW] [models/Medicine.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/models/Medicine.js)
+MongoDB Schema for Medicine stock. Includes `brand`, `category`, `price`, `stock`, `expiryDate`, `prescriptionRequired`, `pharmacyId`.
+
+#### [NEW] [models/Reservation.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/models/Reservation.js)
+Schema tracking reservations (userId, medicineId, quantity, status, pickupCode, etc.).
+
+#### [NEW] [models/Order.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/models/Order.js)
+Schema tracking delivery requests & orders (userId, pharmacyId, items, paymentStatus, deliveryType, status, deliveryAddress, deliveryPhone, createdAt).
+
+#### [NEW] [models/Prescription.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/models/Prescription.js)
+Schema for user uploads (userId, imageUrl, status, pharmacyId, createdAt).
+
+#### [NEW] [models/SearchLog.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/models/SearchLog.js)
+Schema to log medicine searches (medicineName, userId, count, timestamp) to support the Admin's "most searched medicines" widget.
+
+#### [NEW] [middleware/auth.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/middleware/auth.js)
+JWT token extraction, verification, and role authentication.
+
+#### [NEW] [controllers/authController.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/controllers/authController.js)
+Register, Login, Me endpoints. Handles pharmacy licensing fields, auto-encryption.
+
+#### [NEW] [controllers/medicineController.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/controllers/medicineController.js)
+CRUD operations for medicines. Triggers Socket.IO broadcast when stock is modified. Include alternative medicine mapping.
+
+#### [NEW] [controllers/pharmacyController.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/controllers/pharmacyController.js)
+Get all approved pharmacies, calculate nearby pharmacies based on user location.
+
+#### [NEW] [controllers/reservationController.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/controllers/reservationController.js)
+Create/accept/complete reservations.
+
+#### [NEW] [controllers/prescriptionController.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/controllers/prescriptionController.js)
+Handle uploads, support Cloudinary vs. local disk upload.
+
+#### [NEW] [controllers/orderController.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/controllers/orderController.js)
+Handle emergency delivery orders, update status (Pending -> Accepted -> Out for Delivery -> Delivered).
+
+#### [NEW] [routes/auth.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/auth.js)
+Authentication endpoints mapping.
+
+#### [NEW] [routes/medicines.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/medicines.js)
+Inventory and Search endpoints mapping.
+
+#### [NEW] [routes/pharmacies.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/pharmacies.js)
+Pharmacy query mapping.
+
+#### [NEW] [routes/reservations.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/reservations.js)
+Reservation flow mapping.
+
+#### [NEW] [routes/prescriptions.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/prescriptions.js)
+Prescription uploads mapping.
+
+#### [NEW] [routes/orders.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/orders.js)
+Orders and delivery requests mapping.
+
+#### [NEW] [routes/admin.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/routes/admin.js)
+Admin approval and user/pharmacy management endpoints.
+
+---
+
+### Client Component (React + Tailwind CSS)
+
+We will initialize a clean React client in `client/` folder. It will contain:
+
+#### [NEW] [client/tailwind.config.js](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/tailwind.config.js)
+Customizing layout theme with custom mint-green, deep teal, and elegant slate palettes.
+
+#### [NEW] [client/src/index.css](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/index.css)
+Declares custom scrollbars, animations, and Tailwind directives.
+
+#### [NEW] [client/src/main.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/main.jsx)
+React DOM entry point.
+
+#### [NEW] [client/src/App.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/App.jsx)
+Defines React routes (using `react-router-dom`), context providers, and layout frames.
+
+#### [NEW] [client/src/context/AuthContext.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/context/AuthContext.jsx)
+Manages customer/pharmacy/admin sessions, logins, and API headers.
+
+#### [NEW] [client/src/context/SocketContext.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/context/SocketContext.jsx)
+Listens to live stock, reservation, and delivery updates.
+
+#### [NEW] [client/src/components/Navbar.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/components/Navbar.jsx)
+Gorgeous navigation bar with role-based links, active tabs, and real-time alerts.
+
+#### [NEW] [client/src/components/MapContainer.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/components/MapContainer.jsx)
+Displays local pharmacies on a map using Leaflet.js (configured to look like premium maps). Shows pharmacy cards with active stocks and distance.
+
+#### [NEW] [client/src/pages/LandingPage.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/LandingPage.jsx)
+Hero search screen with animated features, search autocomplete, quick links, and a stats summary.
+
+#### [NEW] [client/src/pages/AuthPages.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/AuthPages.jsx)
+Login, Register, Forgot/Reset Password pages styled with card glassmorphism.
+
+#### [NEW] [client/src/pages/CustomerDashboard.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/CustomerDashboard.jsx)
+Integrated page with tabs:
+1. **Search & Map:** Real-time stock search and nearby navigation.
+2. **My Reservations:** Shows status step-tracker for pickups.
+3. **Emergency Deliveries:** Active trackers for deliveries.
+4. **Prescription Vault:** Upload page and current review status.
+
+#### [NEW] [client/src/pages/PharmacyDashboard.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/PharmacyDashboard.jsx)
+Dashboard with tabs:
+1. **Overview Analytics:** Premium charts tracking inventory, low-stock, and sales.
+2. **Inventory Manager:** Fast search/filter and inline stock updates (triggers socket update).
+3. **Reservations Queue:** Accept/Complete actions.
+4. **Delivery Dispatch:** Interactive dispatch board for emergency requests.
+
+#### [NEW] [client/src/pages/AdminDashboard.jsx](file:///c:/Users/anush/OneDrive/Desktop/MediFind/client/src/pages/AdminDashboard.jsx)
+Admin dashboard with:
+1. **Analytics:** Charts displaying total counts, active orders, and popular search terms.
+2. **Approval Desk:** Manage pharmacy licenses and approve shop registrations.
+3. **User Directory:** Comprehensive directory to suspend/remove users or fake pharmacies.
+4. **Global Deliveries:** Real-time map displaying all current delivery riders/routes.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+1. Start backend: `npm run dev` in root directory.
+2. Start client: `npm run dev` in `client/` directory.
+3. Run postman-like requests or mock scripts to verify JWT validation and fallback database read/write.
+
+### Manual Verification
+1. Open browser to the client URL (default `http://localhost:5173`).
+2. Log in as **Customer** (`customer@medifind.com`), search for "Dolo 650" or "Paracetamol", view them on the map, upload a prescription, make a reservation, and submit an emergency delivery.
+3. Open a second browser window (incognito or secondary browser) and log in as **Pharmacy** (`pharmacy@medifind.com`). Observe:
+   - Real-time notification of the new reservation and delivery request.
+   - Click "Accept" on reservation and "Accept -> Out for Delivery -> Delivered" on delivery, and verify the customer page updates instantly without manual page refreshes (via Socket.IO).
+   - Edit the stock of "Paracetamol" in the Pharmacy Inventory screen and check if the Customer's search list updates immediately.
+4. Log in as **Admin** (`admin@medifind.com`). Approve a mock pharmacy registration, check the most searched medicine graph, and monitor delivery requests.

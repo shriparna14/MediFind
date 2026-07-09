@@ -1,0 +1,82 @@
+[
+  {
+    "_id": "7qjhyy2wy5sl2thafmp4w7",
+    "createdAt": "2026-07-05T08:55:48.796Z",
+    "updatedAt": "2026-07-05T08:55:48.800Z",
+    "name": "MediFind Admin",
+    "email": "admin@medifind.com",
+    "password": "$2a$10$hVbvKm1aO5XKMeoaaqRB1eRqV4cQ8raJK4mOwf6E.3xehancWriPG",
+    "role": "admin",
+    "phone": "9999999999",
+    "address": "MediFind HQ, Bengaluru",
+    "isApproved": true
+  },
+  {
+    "_id": "k4v36ti6glk1szceia3man",
+    "createdAt": "2026-07-05T08:55:48.814Z",
+    "updatedAt": "2026-07-05T08:55:48.814Z",
+    "name": "John Doe",
+    "email": "customer@medifind.com",
+    "password": "$2a$10$hVbvKm1aO5XKMeoaaqRB1eRqV4cQ8raJK4mOwf6E.3xehancWriPG",
+    "role": "customer",
+    "phone": "8888888888",
+    "address": "7th Cross, Koramangala, Bengaluru",
+    "isApproved": true
+  },
+  {
+    "_id": "jc7ih56sytocrj4hfyhcn",
+    "createdAt": "2026-07-05T08:55:48.820Z",
+    "updatedAt": "2026-07-05T08:55:48.820Z",
+    "name": "Dr. Ramesh Kumar",
+    "email": "pharmacy@medifind.com",
+    "password": "$2a$10$hVbvKm1aO5XKMeoaaqRB1eRqV4cQ8raJK4mOwf6E.3xehancWriPG",
+    "role": "pharmacy",
+    "phone": "7777777777",
+    "address": "Apollo Pharmacy, 12th Main Rd, Indiranagar, Bengaluru",
+    "shopName": "Apollo Pharmacy (Indiranagar)",
+    "latitude": 12.9718,
+    "longitude": 77.6412,
+    "license": "LIC-998811",
+    "isApproved": true
+  },
+  {
+    "_id": "95pt9rcn5zc2ktgol1kjnj",
+    "createdAt": "2026-07-05T08:55:48.829Z",
+    "updatedAt": "2026-07-05T08:55:48.830Z",
+    "name": "Suresh Patel",
+    "email": "city@medifind.com",
+    "password": "$2a$10$hVbvKm1aO5XKMeoaaqRB1eRqV4cQ8raJK4mOwf6E.3xehancWriPG",
+    "role": "pharmacy",
+    "phone": "6666666666",
+    "address": "City Medicos, 80 Feet Road, Koramangala, Bengaluru",
+    "shopName": "City Medicos (Koramangala)",
+    "latitude": 12.9352,
+    "longitude": 77.6244,
+    "license": "LIC-774433",
+    "isApproved": true
+  },
+  {
+    "_id": "6bmn5zuubqd1x7er4846v8",
+    "createdAt": "2026-07-05T11:55:30.774Z",
+    "updatedAt": "2026-07-05T11:55:30.774Z",
+    "name": "shri",
+    "email": "sp@gmail.com",
+    "password": "$2a$10$e0zB8EWCSYUivoQAqeoCjeZNo/W0ooq6h.tbpXQhPFolu0ZRqHcLG",
+    "role": "customer",
+    "phone": "9876544340",
+    "address": "jayanagar",
+    "isApproved": true
+  },
+  {
+    "_id": "bozmbv74krln6qtm8q65hj",
+    "createdAt": "2026-07-05T16:47:29.433Z",
+    "updatedAt": "2026-07-05T16:47:29.433Z",
+    "name": "shrip",
+    "email": "shrip@medifind.com",
+    "password": "$2a$10$yiX60E7d.8/r.1JHIyunn.5GNwjftxoNS/B7Pog68jbnA05MnkkXW",
+    "role": "customer",
+    "phone": "9876544340",
+    "address": "phagwara, jalandhar",
+    "isApproved": true
+  }
+]

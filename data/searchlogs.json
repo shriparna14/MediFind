@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "dhoz12lwxtd07hl5k7h5fve",
+    "createdAt": "2026-07-05T08:58:28.523Z",
+    "updatedAt": "2026-07-05T16:46:17.229Z",
+    "medicineName": "dolo",
+    "userId": null,
+    "count": 5
+  },
+  {
+    "_id": "j2j0dfjmtw9rchbyqz66e",
+    "createdAt": "2026-07-05T16:08:54.335Z",
+    "updatedAt": "2026-07-05T16:08:54.335Z",
+    "medicineName": "crocin",
+    "userId": null,
+    "count": 1
+  },
+  {
+    "_id": "9szn46y9b55su4198l6xqi",
+    "createdAt": "2026-07-05T16:47:36.297Z",
+    "updatedAt": "2026-07-05T16:47:36.297Z",
+    "medicineName": "dolo 650",
+    "count": 1
+  },
+  {
+    "_id": "tio74n1hvat5mv0s89gkm",
+    "createdAt": "2026-07-05T16:50:25.474Z",
+    "updatedAt": "2026-07-05T17:07:17.810Z",
+    "medicineName": "crocin 650",
+    "count": 3
+  }
+]
