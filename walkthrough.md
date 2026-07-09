@@ -7,7 +7,7 @@ We have successfully updated the MongoDB connection string to your new MongoDB A
 ### 1. Updated Environment Variables
 - Updated `MONGODB_URI` in [.env](file:///c:/Users/anush/OneDrive/Desktop/MediFind/.env) to point to the new MongoDB Atlas cluster under the database `medifind`:
   ```
-  MONGODB_URI=mongodb+srv://shriparna2006_db_user:zqwAuMPEME8yicb1@cluster0.sebmjuw.mongodb.net/medifind?appName=Cluster0
+  MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.sebmjuw.mongodb.net/medifind?appName=Cluster0
   ```
 
 ---
