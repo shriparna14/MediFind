@@ -1,282 +1,1043 @@
 [
   {
-    "_id": "uylwps2nihmhv7ytp2my",
-    "createdAt": "2026-07-05T16:48:10.080Z",
-    "updatedAt": "2026-07-05T16:48:10.080Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407741",
+    "pharmacyId": "6aa59d54e2c8a4ef49407733",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef49407759",
+        "name": "Dolo 650 Tablet",
+        "quantity": 2,
+        "price": 35.31
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940775e",
+        "name": "Saridon Headache Relief",
         "quantity": 1,
-        "price": 30.5
+        "price": 41.31
       }
     ],
-    "totalAmount": 30.5,
+    "totalAmount": 161.93,
+    "status": "PLACED",
     "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "2439282793",
-    "paymentStatus": "pending"
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Indiranagar 12th Main, Bengaluru",
+    "deliveryPhone": "9876543210",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T17:43:32.837Z",
+        "note": "Order placed"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407908",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.350Z",
+    "updatedAt": "2026-09-12T18:43:34.350Z"
   },
   {
-    "_id": "3bzlaupjkij287stepjwje",
-    "createdAt": "2026-07-05T16:48:15.754Z",
-    "updatedAt": "2026-07-05T16:48:15.754Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407742",
+    "pharmacyId": "6aa59d54e2c8a4ef49407734",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef4940775a",
+        "name": "Crocin 650 Advance",
         "quantity": 1,
-        "price": 30.5
+        "price": 30.21
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940775f",
+        "name": "Volini Pain Relief Gel",
+        "quantity": 2,
+        "price": 158.93
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "2439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 348.07,
+    "status": "PHARMACY_ACCEPTED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Koramangala 4th Block, Bengaluru",
+    "deliveryPhone": "9876543211",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T18:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PHARMACY_ACCEPTED",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to PHARMACY_ACCEPTED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407909",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.351Z",
+    "updatedAt": "2026-09-12T18:43:34.351Z"
   },
   {
-    "_id": "ahqt0w7b7t7zcut48yo5t9",
-    "createdAt": "2026-07-05T16:48:15.817Z",
-    "updatedAt": "2026-07-05T16:48:15.817Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407743",
+    "pharmacyId": "6aa59d54e2c8a4ef49407735",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef4940775b",
+        "name": "Calpol 500mg Tablet",
+        "quantity": 2,
+        "price": 22.93
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407760",
+        "name": "Zerodol-SP Tablet",
         "quantity": 1,
-        "price": 30.5
+        "price": 123.22
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "2439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 169.08,
+    "status": "PREPARING",
+    "deliveryType": "standard",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "HSR Layout Sector 2, Bengaluru",
+    "deliveryPhone": "9876543212",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T19:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PREPARING",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to PREPARING"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940790a",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.351Z",
+    "updatedAt": "2026-09-12T18:43:34.351Z"
   },
   {
-    "_id": "0yrfrefw948rbk3zcc5ktvk",
-    "createdAt": "2026-07-05T16:48:23.881Z",
-    "updatedAt": "2026-07-05T16:48:23.881Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407744",
+    "pharmacyId": "6aa59d54e2c8a4ef49407736",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef4940775c",
+        "name": "Combiflam Tablet",
         "quantity": 1,
-        "price": 30.5
+        "price": 44.91
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407761",
+        "name": "Pantocid 40mg Tablet",
+        "quantity": 2,
+        "price": 153.24
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 351.39,
+    "status": "READY",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Jayanagar 9th Block, Bengaluru",
+    "deliveryPhone": "9876543213",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T20:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "READY",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to READY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940790b",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.351Z",
+    "updatedAt": "2026-09-12T18:43:34.351Z"
   },
   {
-    "_id": "1vcwwrlj2oh1uvq2evmmji",
-    "createdAt": "2026-07-05T16:48:27.318Z",
-    "updatedAt": "2026-07-05T16:48:27.318Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407745",
+    "pharmacyId": "6aa59d54e2c8a4ef49407737",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef4940775d",
+        "name": "Meftal-Spas Tablet",
+        "quantity": 2,
+        "price": 52.48
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407762",
+        "name": "Pan-D Capsule",
         "quantity": 1,
-        "price": 30.5
+        "price": 198.24
       }
     ],
-    "totalAmount": 30.5,
+    "totalAmount": 353.2,
+    "status": "OUT_FOR_DELIVERY",
     "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Whitefield ECC Road, Bengaluru",
+    "deliveryPhone": "9876543214",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T21:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "OUT_FOR_DELIVERY",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to OUT_FOR_DELIVERY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940790c",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.351Z",
+    "updatedAt": "2026-09-12T18:43:34.351Z"
   },
   {
-    "_id": "pfzfnt4absgks2aeqr1n",
-    "createdAt": "2026-07-05T16:48:27.363Z",
-    "updatedAt": "2026-07-05T16:48:27.363Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407746",
+    "pharmacyId": "6aa59d54e2c8a4ef49407738",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef4940775e",
+        "name": "Saridon Headache Relief",
+        "quantity": 2,
+        "price": 41.31
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407763",
+        "name": "Omez 20mg Capsule",
         "quantity": 1,
-        "price": 30.5
+        "price": 62.59
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 145.21,
+    "status": "DELIVERED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Malleshwaram 15th Cross, Bengaluru",
+    "deliveryPhone": "9876543215",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T22:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "DELIVERED",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to DELIVERED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940790d",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "bxbva3e4ipnyp052mi6byp",
-    "createdAt": "2026-07-05T16:48:27.399Z",
-    "updatedAt": "2026-07-05T16:48:27.399Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407747",
+    "pharmacyId": "6aa59d54e2c8a4ef49407739",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef4940775f",
+        "name": "Volini Pain Relief Gel",
         "quantity": 1,
-        "price": 30.5
+        "price": 158.93
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407764",
+        "name": "Gelusil MPS Liquid",
+        "quantity": 1,
+        "price": 124.17
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 283.1,
+    "status": "PLACED",
+    "deliveryType": "standard",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "MG Road Trinity Circle, Bengaluru",
+    "deliveryPhone": "9876543216",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-11T23:43:32.837Z",
+        "note": "Order placed"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940790e",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "onsx4ydoufp13cz0a02j5ec",
-    "createdAt": "2026-07-05T16:48:27.431Z",
-    "updatedAt": "2026-07-05T16:48:27.431Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407748",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773a",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
-        "quantity": 1,
-        "price": 30.5
+        "medicineId": "6aa59d54e2c8a4ef49407760",
+        "name": "Zerodol-SP Tablet",
+        "quantity": 2,
+        "price": 123.22
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407765",
+        "name": "Digene Mint Fizz Powder",
+        "quantity": 2,
+        "price": 12.88
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 272.2,
+    "status": "PHARMACY_ACCEPTED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Marathahalli Outer Ring Rd, Bengaluru",
+    "deliveryPhone": "9876543217",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T00:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PHARMACY_ACCEPTED",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to PHARMACY_ACCEPTED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940790f",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "f3e71q2dgoed7j851u2tth",
-    "createdAt": "2026-07-05T16:48:27.462Z",
-    "updatedAt": "2026-07-05T16:48:27.462Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef49407749",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773b",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef49407761",
+        "name": "Pantocid 40mg Tablet",
         "quantity": 1,
-        "price": 30.5
+        "price": 153.24
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407766",
+        "name": "Eno Fruit Salt Regular",
+        "quantity": 1,
+        "price": 140.09
       }
     ],
-    "totalAmount": 30.5,
+    "totalAmount": 343.33,
+    "status": "PREPARING",
     "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Electronic City Phase 1, Bengaluru",
+    "deliveryPhone": "9876543218",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T01:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PREPARING",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to PREPARING"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407910",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "qrd5oonwl7qr2ferz94pt",
-    "createdAt": "2026-07-05T16:48:27.508Z",
-    "updatedAt": "2026-07-05T16:48:27.508Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef4940774a",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773c",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef49407762",
+        "name": "Pan-D Capsule",
         "quantity": 1,
-        "price": 30.5
+        "price": 198.24
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407767",
+        "name": "Razo 20mg Tablet",
+        "quantity": 2,
+        "price": 178.31
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 554.86,
+    "status": "READY",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Rajajinagar 1st Block, Bengaluru",
+    "deliveryPhone": "9876543219",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T02:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "READY",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to READY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407911",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "o8ddxnvl4npa61e58zks",
-    "createdAt": "2026-07-05T16:48:27.568Z",
-    "updatedAt": "2026-07-05T16:48:27.568Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef4940774b",
+    "pharmacyId": "6aa59d54e2c8a4ef49407733",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef49407763",
+        "name": "Omez 20mg Capsule",
         "quantity": 1,
-        "price": 30.5
+        "price": 62.59
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407768",
+        "name": "Cremaffin Plus Syrup",
+        "quantity": 1,
+        "price": 259.15
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 321.74,
+    "status": "OUT_FOR_DELIVERY",
+    "deliveryType": "standard",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Indiranagar 100ft Rd, Bengaluru",
+    "deliveryPhone": "9876543220",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T03:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "OUT_FOR_DELIVERY",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to OUT_FOR_DELIVERY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407912",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "6qbamugsc7flr309duzqi",
-    "createdAt": "2026-07-05T16:48:27.851Z",
-    "updatedAt": "2026-07-05T16:48:27.851Z",
-    "pharmacyId": "jc7ih56sytocrj4hfyhcn",
+    "userId": "6aa59d54e2c8a4ef4940774c",
+    "pharmacyId": "6aa59d54e2c8a4ef49407734",
     "items": [
       {
-        "medicineId": "6viwhpwi1g59ss4r1knas",
-        "name": "Dolo 650",
+        "medicineId": "6aa59d54e2c8a4ef49407764",
+        "name": "Gelusil MPS Liquid",
         "quantity": 1,
-        "price": 30.5
+        "price": 124.17
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407769",
+        "name": "Cetzine 10mg Tablet",
+        "quantity": 1,
+        "price": 22.25
       }
     ],
-    "totalAmount": 30.5,
-    "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "indranagar",
-    "deliveryPhone": "9439282793",
-    "paymentStatus": "pending"
+    "totalAmount": 146.42,
+    "status": "DELIVERED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Koramangala 7th Block, Bengaluru",
+    "deliveryPhone": "9876543221",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T04:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "DELIVERED",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to DELIVERED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407913",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "qu64i52dya6si4o6skzym",
-    "createdAt": "2026-07-05T16:50:33.422Z",
-    "updatedAt": "2026-07-05T16:50:33.422Z",
-    "pharmacyId": "95pt9rcn5zc2ktgol1kjnj",
+    "userId": "6aa59d54e2c8a4ef4940774d",
+    "pharmacyId": "6aa59d54e2c8a4ef49407735",
     "items": [
       {
-        "medicineId": "vffmhccx32yptrp59ufd",
-        "name": "Crocin 650",
+        "medicineId": "6aa59d54e2c8a4ef49407765",
+        "name": "Digene Mint Fizz Powder",
         "quantity": 1,
-        "price": 24.5
+        "price": 12.88
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776a",
+        "name": "Allegra 120mg Tablet",
+        "quantity": 1,
+        "price": 214.72
       }
     ],
-    "totalAmount": 24.5,
+    "totalAmount": 277.6,
+    "status": "PLACED",
     "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "phagwara, jalandhar",
-    "deliveryPhone": "9876544340",
-    "paymentStatus": "pending"
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "HSR Layout 5th Main, Bengaluru",
+    "deliveryPhone": "9876543222",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T05:43:32.837Z",
+        "note": "Order placed"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407914",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
   },
   {
-    "_id": "j8ib4o8mfj0otwea0h3y9h",
-    "createdAt": "2026-07-05T16:50:37.300Z",
-    "updatedAt": "2026-07-05T16:50:37.300Z",
-    "pharmacyId": "95pt9rcn5zc2ktgol1kjnj",
+    "userId": "6aa59d54e2c8a4ef4940774e",
+    "pharmacyId": "6aa59d54e2c8a4ef49407736",
     "items": [
       {
-        "medicineId": "vffmhccx32yptrp59ufd",
-        "name": "Crocin 650",
-        "quantity": 1,
-        "price": 24.5
+        "medicineId": "6aa59d54e2c8a4ef49407766",
+        "name": "Eno Fruit Salt Regular",
+        "quantity": 2,
+        "price": 140.09
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776b",
+        "name": "Ascoril D Plus Syrup",
+        "quantity": 2,
+        "price": 135.04
       }
     ],
-    "totalAmount": 24.5,
+    "totalAmount": 550.26,
+    "status": "PHARMACY_ACCEPTED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Jayanagar 3rd Block, Bengaluru",
+    "deliveryPhone": "9876543223",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T06:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PHARMACY_ACCEPTED",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to PHARMACY_ACCEPTED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407915",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774f",
+    "pharmacyId": "6aa59d54e2c8a4ef49407737",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407767",
+        "name": "Razo 20mg Tablet",
+        "quantity": 1,
+        "price": 178.31
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776c",
+        "name": "Montair-LC Tablet",
+        "quantity": 1,
+        "price": 183.97
+      }
+    ],
+    "totalAmount": 362.28,
+    "status": "PREPARING",
+    "deliveryType": "standard",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Whitefield Palm Meadows, Bengaluru",
+    "deliveryPhone": "9876543224",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T07:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PREPARING",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to PREPARING"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407916",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407750",
+    "pharmacyId": "6aa59d54e2c8a4ef49407738",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407768",
+        "name": "Cremaffin Plus Syrup",
+        "quantity": 1,
+        "price": 259.15
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776d",
+        "name": "Benadryl Cough Formula",
+        "quantity": 2,
+        "price": 144.07
+      }
+    ],
+    "totalAmount": 547.29,
+    "status": "READY",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Malleshwaram Margosa Rd, Bengaluru",
+    "deliveryPhone": "9876543225",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T08:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "READY",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to READY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407917",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.352Z",
+    "updatedAt": "2026-09-12T18:43:34.352Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407751",
+    "pharmacyId": "6aa59d54e2c8a4ef49407739",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407769",
+        "name": "Cetzine 10mg Tablet",
+        "quantity": 1,
+        "price": 22.25
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776e",
+        "name": "Otrivin Oxy Fast Relief",
+        "quantity": 1,
+        "price": 94.77
+      }
+    ],
+    "totalAmount": 167.02,
+    "status": "OUT_FOR_DELIVERY",
     "deliveryType": "emergency",
-    "status": "pending",
-    "deliveryAddress": "phagwara, jalandhar",
-    "deliveryPhone": "9876544340",
-    "paymentStatus": "pending"
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Brigade Road, Bengaluru",
+    "deliveryPhone": "9876543226",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T09:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "OUT_FOR_DELIVERY",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to OUT_FOR_DELIVERY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407918",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407752",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773a",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776a",
+        "name": "Allegra 120mg Tablet",
+        "quantity": 2,
+        "price": 214.72
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776f",
+        "name": "Asthalin 100mcg Inhaler",
+        "quantity": 1,
+        "price": 176.06
+      }
+    ],
+    "totalAmount": 605.5,
+    "status": "DELIVERED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Bellandur Green Glen, Bengaluru",
+    "deliveryPhone": "9876543227",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T10:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "DELIVERED",
+        "timestamp": "2026-09-12T18:43:34.316Z",
+        "note": "Order updated to DELIVERED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407919",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407753",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773b",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776b",
+        "name": "Ascoril D Plus Syrup",
+        "quantity": 1,
+        "price": 135.04
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407770",
+        "name": "Budecort 200 Inhaler",
+        "quantity": 2,
+        "price": 340.56
+      }
+    ],
+    "totalAmount": 816.16,
+    "status": "PLACED",
+    "deliveryType": "standard",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Electronic City Doddathogur, Bengaluru",
+    "deliveryPhone": "9876543228",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T11:43:32.837Z",
+        "note": "Order placed"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940791a",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407754",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773c",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776c",
+        "name": "Montair-LC Tablet",
+        "quantity": 2,
+        "price": 183.97
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407771",
+        "name": "Augmentin 625 Duo Tablet",
+        "quantity": 1,
+        "price": 205.3
+      }
+    ],
+    "totalAmount": 573.24,
+    "status": "PHARMACY_ACCEPTED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Rajajinagar West of Chord Rd, Bengaluru",
+    "deliveryPhone": "9876543229",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T12:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PHARMACY_ACCEPTED",
+        "timestamp": "2026-09-12T18:43:34.317Z",
+        "note": "Order updated to PHARMACY_ACCEPTED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940791b",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407741",
+    "pharmacyId": "6aa59d54e2c8a4ef49407733",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776d",
+        "name": "Benadryl Cough Formula",
+        "quantity": 2,
+        "price": 144.07
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407772",
+        "name": "Azithral 500mg Tablet",
+        "quantity": 2,
+        "price": 127.63
+      }
+    ],
+    "totalAmount": 593.4,
+    "status": "PREPARING",
+    "deliveryType": "emergency",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Indiranagar 12th Main, Bengaluru",
+    "deliveryPhone": "9876543210",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T13:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PREPARING",
+        "timestamp": "2026-09-12T18:43:34.317Z",
+        "note": "Order updated to PREPARING"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940791c",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407742",
+    "pharmacyId": "6aa59d54e2c8a4ef49407734",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776e",
+        "name": "Otrivin Oxy Fast Relief",
+        "quantity": 2,
+        "price": 94.77
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407773",
+        "name": "Taxim-O 200mg Tablet",
+        "quantity": 1,
+        "price": 170.07
+      }
+    ],
+    "totalAmount": 359.61,
+    "status": "READY",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Koramangala 4th Block, Bengaluru",
+    "deliveryPhone": "9876543211",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T14:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "READY",
+        "timestamp": "2026-09-12T18:43:34.317Z",
+        "note": "Order updated to READY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940791d",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407743",
+    "pharmacyId": "6aa59d54e2c8a4ef49407735",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef4940776f",
+        "name": "Asthalin 100mcg Inhaler",
+        "quantity": 1,
+        "price": 176.06
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407774",
+        "name": "Oflox 200mg Tablet",
+        "quantity": 2,
+        "price": 87.39
+      }
+    ],
+    "totalAmount": 350.84,
+    "status": "OUT_FOR_DELIVERY",
+    "deliveryType": "standard",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "HSR Layout Sector 2, Bengaluru",
+    "deliveryPhone": "9876543212",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T15:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "OUT_FOR_DELIVERY",
+        "timestamp": "2026-09-12T18:43:34.317Z",
+        "note": "Order updated to OUT_FOR_DELIVERY"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940791e",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407744",
+    "pharmacyId": "6aa59d54e2c8a4ef49407736",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407770",
+        "name": "Budecort 200 Inhaler",
+        "quantity": 2,
+        "price": 340.56
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407775",
+        "name": "Ciplox 500mg Tablet",
+        "quantity": 2,
+        "price": 46.95
+      }
+    ],
+    "totalAmount": 775.02,
+    "status": "DELIVERED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Jayanagar 9th Block, Bengaluru",
+    "deliveryPhone": "9876543213",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T16:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "DELIVERED",
+        "timestamp": "2026-09-12T18:43:34.317Z",
+        "note": "Order updated to DELIVERED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef4940791f",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407745",
+    "pharmacyId": "6aa59d54e2c8a4ef49407737",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407771",
+        "name": "Augmentin 625 Duo Tablet",
+        "quantity": 2,
+        "price": 205.3
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407776",
+        "name": "Electral ORS Sachet",
+        "quantity": 2,
+        "price": 22.38
+      }
+    ],
+    "totalAmount": 505.36,
+    "status": "PLACED",
+    "deliveryType": "emergency",
+    "paymentMethod": "cod",
+    "paymentStatus": "pending",
+    "deliveryAddress": "Whitefield ECC Road, Bengaluru",
+    "deliveryPhone": "9876543214",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T17:43:32.837Z",
+        "note": "Order placed"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407920",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407746",
+    "pharmacyId": "6aa59d54e2c8a4ef49407738",
+    "items": [
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407772",
+        "name": "Azithral 500mg Tablet",
+        "quantity": 1,
+        "price": 127.63
+      },
+      {
+        "medicineId": "6aa59d54e2c8a4ef49407777",
+        "name": "Enerzal Apple Drink",
+        "quantity": 2,
+        "price": 41.99
+      }
+    ],
+    "totalAmount": 211.61,
+    "status": "PHARMACY_ACCEPTED",
+    "deliveryType": "standard",
+    "paymentMethod": "test_payment",
+    "paymentStatus": "paid",
+    "deliveryAddress": "Malleshwaram 15th Cross, Bengaluru",
+    "deliveryPhone": "9876543215",
+    "timeline": [
+      {
+        "status": "PLACED",
+        "timestamp": "2026-09-12T18:43:32.837Z",
+        "note": "Order placed"
+      },
+      {
+        "status": "PHARMACY_ACCEPTED",
+        "timestamp": "2026-09-12T18:43:34.317Z",
+        "note": "Order updated to PHARMACY_ACCEPTED"
+      }
+    ],
+    "_id": "6aa59d56e2c8a4ef49407921",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.353Z",
+    "updatedAt": "2026-09-12T18:43:34.353Z"
   }
 ]

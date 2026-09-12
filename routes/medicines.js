@@ -1,22 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { getMedicines, addMedicine, updateMedicine, deleteMedicine } = require('../controllers/medicineController');
+const {
+  searchMedicines,
+  getMedicineById,
+  createMedicine,
+  updateMedicine,
+  deleteMedicine
+} = require('../controllers/medicineController');
 const { protect, authorize } = require('../middleware/auth');
+const { validateMedicine } = require('../middleware/validators');
 
-// Allow optional protect so we can log searches with user IDs if they are logged in
-const optionalProtect = async (req, res, next) => {
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    return protect(req, res, next);
-  }
-  next();
-};
-
-router.route('/')
-  .get(optionalProtect, getMedicines)
-  .post(protect, authorize('pharmacy'), addMedicine);
-
-router.route('/:id')
-  .put(protect, authorize('pharmacy'), updateMedicine)
-  .delete(protect, authorize('pharmacy'), deleteMedicine);
+router.get('/search', searchMedicines);
+router.get('/:id', getMedicineById);
+router.post('/', protect, authorize('pharmacy'), validateMedicine, createMedicine);
+router.put('/:id', protect, authorize('pharmacy'), validateMedicine, updateMedicine);
+router.delete('/:id', protect, authorize('pharmacy'), deleteMedicine);
 
 module.exports = router;

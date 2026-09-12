@@ -1,40 +1,50 @@
 const mongoose = require('mongoose');
-const localDb = require('../utils/localDb');
 
-const PrescriptionSchema = new mongoose.Schema({
+const prescriptionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   pharmacyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   imageUrl: {
     type: String,
     required: true
   },
+  publicId: {
+    type: String
+  },
+  fileType: {
+    type: String,
+    enum: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+    default: 'image/jpeg'
+  },
+  fileSize: {
+    type: Number
+  },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
+    default: 'pending',
+    index: true
+  },
+  rejectionReason: {
+    type: String
+  },
+  notes: {
+    type: String
   }
 }, {
   timestamps: true
 });
 
-const PrescriptionModel = mongoose.model('Prescription', PrescriptionSchema);
+prescriptionSchema.index({ userId: 1, createdAt: -1 });
+prescriptionSchema.index({ pharmacyId: 1, status: 1 });
 
-module.exports = new Proxy({}, {
-  get: function(target, prop) {
-    const useLocal = !process.env.MONGODB_URI;
-    const activeTarget = useLocal ? localDb.Prescription : PrescriptionModel;
-    const value = activeTarget[prop];
-    if (typeof value === 'function') {
-      return value.bind(activeTarget);
-    }
-    return value;
-  }
-});
+module.exports = mongoose.model('Prescription', prescriptionSchema);

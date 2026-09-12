@@ -1,238 +1,349 @@
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Medicine = require('../models/Medicine');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+const localDb = require('../utils/localDb');
+const { logAudit } = require('../utils/auditLogger');
 
-// @desc    Create a new order (Emergency Delivery)
-// @route   POST /api/orders
-// @access  Private (Customer only)
-exports.createOrder = async (req, res) => {
+/**
+ * @desc    Create new multi-item order with MongoDB transaction
+ * @route   POST /api/orders
+ * @access  Private (Customer)
+ */
+const createOrder = async (req, res, next) => {
+  let session = null;
+  if (localDb.isUsingMongo()) {
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+    } catch (sessionErr) {
+      session = null; // Fallback for MongoDB setups without replica sets
+    }
+  }
+
   try {
-    const { pharmacyId, items, deliveryAddress, deliveryPhone, deliveryType } = req.body;
-
-    if (!items || items.length === 0) {
-      return res.status(400).json({ success: false, message: 'No items in order' });
-    }
-
-    // Verify stock availability and deduct
-    let totalAmount = 0;
-    const itemDetails = [];
-
-    for (const item of items) {
-      const med = await Medicine.findById(item.medicineId);
-      if (!med) {
-        return res.status(404).json({ success: false, message: `Medicine ${item.name} not found` });
-      }
-      if (med.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${med.name}` });
-      }
-
-      totalAmount += med.price * item.quantity;
-      itemDetails.push({
-        medicineId: item.medicineId,
-        name: med.name,
-        quantity: item.quantity,
-        price: med.price
-      });
-    }
-
-    // Deduct stock for all items
-    for (const item of itemDetails) {
-      const med = await Medicine.findById(item.medicineId);
-      const newStock = med.stock - item.quantity;
-      await Medicine.findByIdAndUpdate(item.medicineId, { stock: newStock });
-
-      // Socket update stock
-      const io = req.app.get('socketio');
-      if (io) {
-        io.emit('stock_update', {
-          medicineId: med._id,
-          medicineName: med.name,
-          pharmacyId: med.pharmacyId,
-          stock: newStock
-        });
-      }
-    }
-
-    // Create the order
-    const order = await Order.create({
-      userId: req.user.id,
+    const {
       pharmacyId,
-      items: itemDetails,
-      totalAmount,
-      deliveryType: deliveryType || 'emergency',
-      status: 'pending',
+      items,
       deliveryAddress,
       deliveryPhone,
-      paymentStatus: 'pending'
-    });
+      deliveryType = 'standard',
+      paymentMethod = 'cod',
+      notes = ''
+    } = req.body;
 
-    // Populate user & pharmacy details for full object
-    const user = await User.findById(req.user.id);
-    const pharmacy = await User.findById(pharmacyId);
-    const orderData = typeof order.toObject === 'function' ? order.toObject() : order;
-    const orderObj = {
-      ...orderData,
-      id: orderData.id || orderData._id,
-      customer: {
-        name: user.name,
-        phone: user.phone,
-        email: user.email
-      },
-      pharmacy: {
-        shopName: pharmacy.shopName,
-        address: pharmacy.address,
-        phone: pharmacy.phone
+    const userId = req.user.id || req.user._id;
+
+    if (!pharmacyId || !items || !Array.isArray(items) || items.length === 0) {
+      if (session) await session.abortTransaction();
+      return res.status(400).json({ success: false, message: 'Invalid order parameters.' });
+    }
+
+    let calculatedTotal = 0;
+    const processedItems = [];
+
+    // Verify stock and calculate price atomically
+    for (const item of items) {
+      let med = null;
+      if (localDb.isUsingMongo()) {
+        med = session
+          ? await Medicine.findById(item.medicineId).session(session)
+          : await Medicine.findById(item.medicineId);
+      } else {
+        med = await localDb.Medicine.findById(item.medicineId);
       }
+
+      if (!med) {
+        if (session) await session.abortTransaction();
+        return res.status(404).json({ success: false, message: `Medicine ${item.medicineId} not found.` });
+      }
+
+      if (med.isExpired) {
+        if (session) await session.abortTransaction();
+        return res.status(400).json({ success: false, message: `Cannot order expired medicine: ${med.name}` });
+      }
+
+      if (med.stock < requestedQty) {
+        if (session) await session.abortTransaction();
+        return res.status(409).json({
+          success: false,
+          status: 409,
+          message: `Insufficient stock for ${med.name}. Available: ${med.stock}, requested: ${requestedQty}.`
+        });
+      }
+
+      // Decrement stock
+      med.stock -= requestedQty;
+      if (session) {
+        await med.save({ session });
+      } else if (localDb.isUsingMongo()) {
+        await med.save();
+      }
+
+      const effectivePrice = Number(med.price) * (1 - (Number(med.discount || 0) / 100));
+      calculatedTotal += effectivePrice * requestedQty;
+
+      processedItems.push({
+        medicineId: med._id || med.id,
+        name: med.name,
+        quantity: requestedQty,
+        price: Number(effectivePrice.toFixed(2))
+      });
+    }
+
+    // Add Emergency Dispatch Fee if selected
+    if (deliveryType === 'emergency') {
+      calculatedTotal += 50;
+    }
+
+    const orderData = {
+      userId,
+      pharmacyId,
+      items: processedItems,
+      totalAmount: Number(calculatedTotal.toFixed(2)),
+      deliveryType,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'test_payment' ? 'paid' : 'pending',
+      deliveryAddress,
+      deliveryPhone,
+      notes,
+      status: 'PLACED',
+      timeline: [{
+        status: 'PLACED',
+        timestamp: new Date(),
+        note: `Order placed (${deliveryType === 'emergency' ? 'Priority Emergency' : 'Standard Delivery'})`
+      }]
     };
 
-    // Socket notify pharmacy about new delivery/order request
+    let order = null;
+    if (localDb.isUsingMongo()) {
+      if (session) {
+        const created = await Order.create([orderData], { session });
+        order = created[0];
+        await session.commitTransaction();
+      } else {
+        order = await Order.create(orderData);
+      }
+    } else {
+      order = await localDb.Order.create(orderData);
+    }
+
+    // Populate pharmacy for complete response
+    const populatedOrder = await Order.findById(order._id || order.id)
+      .populate('pharmacyId', 'shopName address phone')
+      .populate('userId', 'name email phone');
+
+    // Create Notification & Broadcast via Socket.IO
     const io = req.app.get('socketio');
     if (io) {
-      io.emit(`new_order_pharmacy_${pharmacyId}`, orderObj);
-    }
-
-    res.status(201).json({ success: true, data: orderObj });
-  } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({ success: false, message: 'Server error creating order' });
-  }
-};
-
-// @desc    Get customer's orders
-// @route   GET /api/orders/my
-// @access  Private (Customer only)
-exports.getMyOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ userId: req.user.id });
-
-    const enriched = await Promise.all(
-      orders.map(async (ord) => {
-        const pharmacy = await User.findById(ord.pharmacyId);
-        const ordObj = { ...ord };
-        if (pharmacy) {
-          ordObj.pharmacy = {
-            shopName: pharmacy.shopName,
-            address: pharmacy.address,
-            phone: pharmacy.phone
-          };
-        }
-        return ordObj;
-      })
-    );
-
-    // Sort by newest
-    enriched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    res.json({ success: true, count: enriched.length, data: enriched });
-  } catch (error) {
-    console.error('Get my orders error:', error);
-    res.status(500).json({ success: false, message: 'Server error retrieving orders' });
-  }
-};
-
-// @desc    Get pharmacy's orders / delivery requests
-// @route   GET /api/orders/pharmacy
-// @access  Private (Pharmacy only)
-exports.getPharmacyOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ pharmacyId: req.user.id });
-
-    const enriched = await Promise.all(
-      orders.map(async (ord) => {
-        const customer = await User.findById(ord.userId);
-        const ordObj = { ...ord };
-        if (customer) {
-          ordObj.customer = {
-            name: customer.name,
-            phone: customer.phone,
-            email: customer.email
-          };
-        }
-        return ordObj;
-      })
-    );
-
-    // Sort by newest
-    enriched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    res.json({ success: true, count: enriched.length, data: enriched });
-  } catch (error) {
-    console.error('Get pharmacy orders error:', error);
-    res.status(500).json({ success: false, message: 'Server error retrieving orders' });
-  }
-};
-
-// @desc    Update order/delivery status
-// @route   PUT /api/orders/:id/status
-// @access  Private (Pharmacy/Admin)
-exports.updateOrderStatus = async (req, res) => {
-  try {
-    const { status, paymentStatus } = req.body;
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
-    }
-
-    // Role check
-    if (req.user.role === 'pharmacy' && String(order.pharmacyId) !== String(req.user.id)) {
-      return res.status(403).json({ success: false, message: 'Not authorized to modify this order' });
-    }
-
-    const oldStatus = order.status;
-
-    if (oldStatus === 'cancelled' || oldStatus === 'delivered') {
-      return res.status(400).json({ success: false, message: `Order is already ${oldStatus}` });
-    }
-
-    // If cancelled, restore medicine stock
-    if (status === 'cancelled') {
-      for (const item of order.items) {
-        const med = await Medicine.findById(item.medicineId);
-        if (med) {
-          const restoredStock = med.stock + item.quantity;
-          await Medicine.findByIdAndUpdate(item.medicineId, { stock: restoredStock });
-
-          // Stock update socket broadcast
-          const io = req.app.get('socketio');
-          if (io) {
-            io.emit('stock_update', {
-              medicineId: med._id,
-              medicineName: med.name,
-              pharmacyId: med.pharmacyId,
-              stock: restoredStock
-            });
-          }
-        }
+      io.to(String(pharmacyId)).emit('new_order', populatedOrder || order);
+      if (deliveryType === 'emergency') {
+        io.emit('global_emergency_order', populatedOrder || order);
       }
     }
 
-    const updates = {};
-    if (status) updates.status = status;
-    if (paymentStatus) updates.paymentStatus = paymentStatus;
-
-    const updatedOrder = await Order.findByIdAndUpdate(req.params.id, updates, { new: true });
-
-    // Socket notification to customer & pharmacy about order updates
-    const io = req.app.get('socketio');
-    if (io) {
-      // Notify customer
-      io.emit(`order_status_user_${order.userId}`, {
-        orderId: order._id || order.id,
-        status: status || order.status,
-        paymentStatus: paymentStatus || order.paymentStatus
-      });
-      // Notify pharmacy (e.g. for dual screen sync)
-      io.emit(`order_status_pharmacy_${order.pharmacyId}`, {
-        orderId: order._id || order.id,
-        status: status || order.status,
-        paymentStatus: paymentStatus || order.paymentStatus
+    if (localDb.isUsingMongo()) {
+      await Notification.create({
+        userId: pharmacyId,
+        title: deliveryType === 'emergency' ? '🚨 Priority Emergency Order' : '📦 New Order Received',
+        message: `Order #${String(order._id).slice(-6)} placed with ${processedItems.length} items. Total: ₹${calculatedTotal.toFixed(2)}`,
+        type: deliveryType === 'emergency' ? 'EMERGENCY' : 'ORDER',
+        referenceId: order._id,
+        referenceModel: 'Order'
       });
     }
 
-    res.json({ success: true, data: updatedOrder });
-  } catch (error) {
-    console.error('Update order status error:', error);
-    res.status(500).json({ success: false, message: 'Server error updating order' });
+    await logAudit('ORDER_CREATED', {
+      userId,
+      pharmacyId,
+      targetId: order._id || order.id,
+      targetModel: 'Order',
+      details: { totalAmount: calculatedTotal, deliveryType, itemsCount: processedItems.length }
+    }, req);
+
+    res.status(201).json({
+      success: true,
+      message: deliveryType === 'emergency'
+        ? 'Emergency order dispatched! Priority rider is being assigned.'
+        : 'Order placed successfully!',
+      data: populatedOrder || order
+    });
+  } catch (err) {
+    if (session) {
+      try {
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
+      } catch (abortErr) {
+        // ignore abort error
+      }
+    }
+
+    if (
+      err.name === 'VersionError' ||
+      err.code === 112 ||
+      (err.errorLabels && (err.errorLabels.includes('TransientTransactionError') || err.errorLabels.includes('UnknownTransactionCommitResult')))
+    ) {
+      return res.status(409).json({
+        success: false,
+        status: 409,
+        message: 'One or more items experienced stock contention. Please refresh cart.'
+      });
+    }
+
+    next(err);
+  } finally {
+    if (session) {
+      try {
+        await session.endSession();
+      } catch (e) {}
+    }
   }
+};
+
+/**
+ * @desc    Get orders for currently authenticated customer
+ * @route   GET /api/orders/my
+ * @access  Private (Customer)
+ */
+const getMyOrders = async (req, res, next) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const { page = 1, limit = 20 } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    if (localDb.isUsingMongo()) {
+      const total = await Order.countDocuments({ userId });
+      const orders = await Order.find({ userId })
+        .populate('pharmacyId', 'shopName address phone rating')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum);
+
+      res.json({
+        success: true,
+        count: orders.length,
+        pagination: { total, page: pageNum, pages: Math.ceil(total / limitNum) },
+        data: orders
+      });
+    } else {
+      const orders = (await localDb.Order.find({ userId })) || [];
+      res.json({ success: true, count: orders.length, data: orders });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @desc    Get pharmacy order requests
+ * @route   GET /api/orders/pharmacy
+ * @access  Private (Pharmacy)
+ */
+const getPharmacyOrders = async (req, res, next) => {
+  try {
+    const pharmacyId = req.user.id || req.user._id;
+    const { status, page = 1, limit = 50 } = req.query;
+
+    const query = { pharmacyId };
+    if (status && status !== 'all') {
+      query.status = status.toUpperCase();
+    }
+
+    if (localDb.isUsingMongo()) {
+      const orders = await Order.find(query)
+        .populate('userId', 'name phone email address')
+        .sort({ createdAt: -1 })
+        .limit(Number(limit));
+
+      res.json({ success: true, count: orders.length, data: orders });
+    } else {
+      const orders = (await localDb.Order.find({ pharmacyId })) || [];
+      res.json({ success: true, count: orders.length, data: orders });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @desc    Update order status in lifecycle
+ * @route   PUT /api/orders/:id/status
+ * @access  Private (Pharmacy / Admin)
+ */
+const updateOrderStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status, note } = req.body;
+
+    const validStatuses = ['PLACED', 'PHARMACY_ACCEPTED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid order status specified.' });
+    }
+
+    let order = null;
+    if (localDb.isUsingMongo()) {
+      order = await Order.findById(id);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found.' });
+      }
+
+      order.status = status;
+      order.timeline.push({
+        status,
+        timestamp: new Date(),
+        note: note || `Order marked as ${status}`
+      });
+
+      if (status === 'DELIVERED') {
+        order.paymentStatus = 'paid';
+      }
+
+      await order.save();
+    } else {
+      order = await localDb.Order.findById(id);
+      if (order) {
+        order.status = status;
+      }
+    }
+
+    const populated = await Order.findById(id)
+      .populate('pharmacyId', 'shopName address phone')
+      .populate('userId', 'name phone email');
+
+    // Broadcast update to user
+    const io = req.app.get('socketio');
+    if (io) {
+      io.to(String(order.userId)).emit('order_status', {
+        orderId: order._id,
+        status,
+        order: populated || order
+      });
+    }
+
+    await logAudit('ORDER_STATUS_CHANGED', {
+      targetId: order._id,
+      targetModel: 'Order',
+      details: { newStatus: status }
+    }, req);
+
+    res.json({
+      success: true,
+      message: `Order status updated to ${status}`,
+      data: populated || order
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  createOrder,
+  getMyOrders,
+  getPharmacyOrders,
+  updateOrderStatus
 };

@@ -1,0 +1,167 @@
+[
+  {
+    "userId": "6aa59d54e2c8a4ef49407741",
+    "pharmacyId": "6aa59d54e2c8a4ef49407733",
+    "rating": 5,
+    "comment": "Extremely fast 30-minute hold reservation and friendly pharmacist staff!",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407940",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407742",
+    "pharmacyId": "6aa59d54e2c8a4ef49407734",
+    "rating": 5,
+    "comment": "Saved me during late night emergency. Prompt verification and stock availability.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407941",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407743",
+    "pharmacyId": "6aa59d54e2c8a4ef49407735",
+    "rating": 5,
+    "comment": "Lowest prices in the locality and well-organized medicine counter.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407942",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407744",
+    "pharmacyId": "6aa59d54e2c8a4ef49407736",
+    "rating": 5,
+    "comment": "Verified my doctor prescription within 5 minutes. Excellent service!",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407943",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407745",
+    "pharmacyId": "6aa59d54e2c8a4ef49407737",
+    "rating": 5,
+    "comment": "Always has genuine stock and helpful staff. Highly recommended.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407944",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407746",
+    "pharmacyId": "6aa59d54e2c8a4ef49407738",
+    "rating": 5,
+    "comment": "Quick pickup using the unique 4-character pickup code at the counter.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407945",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407747",
+    "pharmacyId": "6aa59d54e2c8a4ef49407739",
+    "rating": 5,
+    "comment": "Extremely fast 30-minute hold reservation and friendly pharmacist staff!",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407946",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407748",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773a",
+    "rating": 5,
+    "comment": "Saved me during late night emergency. Prompt verification and stock availability.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407947",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407749",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773b",
+    "rating": 5,
+    "comment": "Lowest prices in the locality and well-organized medicine counter.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407948",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774a",
+    "pharmacyId": "6aa59d54e2c8a4ef4940773c",
+    "rating": 5,
+    "comment": "Verified my doctor prescription within 5 minutes. Excellent service!",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef49407949",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774b",
+    "pharmacyId": "6aa59d54e2c8a4ef49407733",
+    "rating": 5,
+    "comment": "Always has genuine stock and helpful staff. Highly recommended.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef4940794a",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774c",
+    "pharmacyId": "6aa59d54e2c8a4ef49407734",
+    "rating": 5,
+    "comment": "Quick pickup using the unique 4-character pickup code at the counter.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef4940794b",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774d",
+    "pharmacyId": "6aa59d54e2c8a4ef49407735",
+    "rating": 5,
+    "comment": "Extremely fast 30-minute hold reservation and friendly pharmacist staff!",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef4940794c",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774e",
+    "pharmacyId": "6aa59d54e2c8a4ef49407736",
+    "rating": 5,
+    "comment": "Saved me during late night emergency. Prompt verification and stock availability.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef4940794d",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774f",
+    "pharmacyId": "6aa59d54e2c8a4ef49407737",
+    "rating": 5,
+    "comment": "Lowest prices in the locality and well-organized medicine counter.",
+    "isVerifiedPurchase": true,
+    "_id": "6aa59d56e2c8a4ef4940794e",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.476Z",
+    "updatedAt": "2026-09-12T18:43:34.476Z"
+  }
+]

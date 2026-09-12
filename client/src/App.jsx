@@ -2,12 +2,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
+import CartDrawer from './components/CartDrawer';
 import LandingPage from './pages/LandingPage';
 import AuthPages from './pages/AuthPages';
 import CustomerDashboard from './pages/CustomerDashboard';
 import PharmacyDashboard from './pages/PharmacyDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+
+import ChatDrawer from './components/ChatDrawer';
+import { Sparkles } from 'lucide-react';
 
 // Route protection for Authenticated users & specific roles
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -32,16 +37,37 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
-// Route controller that forces a dashboard sub-tab depending on route
-const TabWrapper = ({ Component, initialTab }) => {
-  // We can pass initialTab as a custom prop to the component
-  return <Component key={initialTab} defaultTab={initialTab} />;
-};
-
 function MainLayout() {
+  const { user } = useAuth();
+  const [isAiChatOpen, setIsAiChatOpen] = React.useState(false);
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative">
       <Navbar />
+      <CartDrawer />
+      
+      {/* Floating MediFind AI launcher */}
+      {!isAiChatOpen && (
+        <button
+          onClick={() => setIsAiChatOpen(true)}
+          className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2.5 text-xs font-bold border border-slate-700/50 hover:scale-105 transition-all cursor-pointer shadow-brand-500/20"
+          title="Open MediFind AI Assistant"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <Sparkles className="w-4 h-4 text-emerald-300" />
+          <span>MediFind AI</span>
+        </button>
+      )}
+
+      {/* Persistent MediFind AI Chat Drawer */}
+      {isAiChatOpen && (
+        <ChatDrawer
+          activeUserId={user?.id || user?._id}
+          activeUserName={user?.name || 'User'}
+          onClose={() => setIsAiChatOpen(false)}
+        />
+      )}
+
       <main className="flex-1 flex flex-col">
         <Routes>
           {/* Public routes */}
@@ -51,6 +77,14 @@ function MainLayout() {
           <Route path="/forgot-password" element={<AuthPages />} />
 
           {/* Customer Protected Routes */}
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/customer/reservations"
             element={
@@ -165,7 +199,9 @@ export default function App() {
     <Router>
       <AuthProvider>
         <SocketProvider>
-          <MainLayout />
+          <CartProvider>
+            <MainLayout />
+          </CartProvider>
         </SocketProvider>
       </AuthProvider>
     </Router>

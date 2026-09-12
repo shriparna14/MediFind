@@ -1,77 +1,106 @@
 const mongoose = require('mongoose');
-const localDb = require('../utils/localDb');
 
-const OrderSchema = new mongoose.Schema({
+const orderItemSchema = new mongoose.Schema({
+  medicineId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Medicine',
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  }
+}, { _id: false });
+
+const orderTimelineSchema = new mongoose.Schema({
+  status: {
+    type: String,
+    required: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  note: {
+    type: String
+  }
+}, { _id: false });
+
+const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   pharmacyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
-  items: [{
-    medicineId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Medicine',
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
-    quantity: {
-      type: Number,
-      required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    }
-  }],
+  items: [orderItemSchema],
   totalAmount: {
     type: Number,
-    required: true
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid'],
-    default: 'pending'
-  },
-  deliveryType: {
-    type: String,
-    enum: ['pickup', 'emergency'],
-    default: 'pickup'
+    required: true,
+    min: 0
   },
   status: {
     type: String,
-    enum: ['pending', 'accepted', 'out-for-delivery', 'delivered', 'cancelled'],
+    enum: [
+      'PLACED',
+      'PHARMACY_ACCEPTED',
+      'PREPARING',
+      'READY',
+      'OUT_FOR_DELIVERY',
+      'DELIVERED',
+      'CANCELLED'
+    ],
+    default: 'PLACED',
+    index: true
+  },
+  deliveryType: {
+    type: String,
+    enum: ['standard', 'emergency'],
+    default: 'standard'
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['cod', 'test_payment'],
+    default: 'cod'
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed', 'refunded'],
     default: 'pending'
   },
   deliveryAddress: {
     type: String,
-    required: true
+    required: [true, 'Please provide delivery address']
   },
   deliveryPhone: {
     type: String,
-    required: true
-  }
+    required: [true, 'Please provide contact phone number']
+  },
+  notes: {
+    type: String
+  },
+  timeline: [orderTimelineSchema]
 }, {
   timestamps: true
 });
 
-const OrderModel = mongoose.model('Order', OrderSchema);
+orderSchema.index({ userId: 1, createdAt: -1 });
+orderSchema.index({ pharmacyId: 1, status: 1, createdAt: -1 });
 
-module.exports = new Proxy({}, {
-  get: function(target, prop) {
-    const useLocal = !process.env.MONGODB_URI;
-    const activeTarget = useLocal ? localDb.Order : OrderModel;
-    const value = activeTarget[prop];
-    if (typeof value === 'function') {
-      return value.bind(activeTarget);
-    }
-    return value;
-  }
-});
+module.exports = mongoose.model('Order', orderSchema);

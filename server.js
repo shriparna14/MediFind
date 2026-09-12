@@ -1,111 +1,129 @@
-require('dotenv').config();
 const express = require('express');
 const http = require('http');
-const socketio = require('socket.io');
+const socketIo = require('socket.io');
 const cors = require('cors');
+const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const errorHandler = require('./middleware/errorHandler');
+const { checkAndReleaseExpiredReservations } = require('./utils/expiryWorker');
 
-const connectDB = require('./config/db');
-const seedData = require('./utils/seeder');
+dotenv.config();
 
-// Route files
-const authRoutes = require('./routes/auth');
-const medicineRoutes = require('./routes/medicines');
-const pharmacyRoutes = require('./routes/pharmacies');
-const reservationRoutes = require('./routes/reservations');
-const orderRoutes = require('./routes/orders');
-const prescriptionRoutes = require('./routes/prescriptions');
-const adminRoutes = require('./routes/admin');
-
-// Initialize express app
 const app = express();
 const server = http.createServer(app);
 
-// Enable CORS
-app.use(cors({
-  origin: '*', // In development, allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
-}));
+// Allowed Origins for CORS
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173'
+];
 
-// Express body parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve local uploads folder statically
-const UPLOADS_PATH = path.join(__dirname, 'uploads');
-if (!fs.existsSync(UPLOADS_PATH)) {
-  fs.mkdirSync(UPLOADS_PATH, { recursive: true });
-}
-app.use('/uploads', express.static(UPLOADS_PATH));
-
-// Mount API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/medicines', medicineRoutes);
-app.use('/api/pharmacies', pharmacyRoutes);
-app.use('/api/reservations', reservationRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/prescriptions', prescriptionRoutes);
-app.use('/api/admin', adminRoutes);
-
-// Base route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the Medicine Availability & Emergency Pharmacy Finder API',
-    status: 'Running'
-  });
-});
-
-// Configure Socket.IO
-const io = socketio(server, {
+// Socket.IO Setup
+const io = socketIo(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
   }
 });
 
-// Attach Socket.IO to application settings for access in controllers
 app.set('socketio', io);
 
-// Socket.IO event handler
+// Socket.io Real-time connection handler
 io.on('connection', (socket) => {
-  console.log(`🔌 New client connected: ${socket.id}`);
-
-  // Basic real-time communication support (room subscriptions, notifications)
-  socket.on('join_room', (roomId) => {
-    socket.join(roomId);
-    console.log(`👥 Client ${socket.id} joined room: ${roomId}`);
+  // Join personal user / pharmacy room
+  socket.on('join_user_room', (userId) => {
+    if (userId) {
+      socket.join(String(userId));
+    }
   });
 
-  // Real-time chat messaging event between pharmacy & customer
+  // Direct chat messaging between customer and pharmacy
   socket.on('send_message', (data) => {
-    const { senderId, receiverId, message, senderName, timestamp } = data;
-    io.to(receiverId).emit('receive_message', data);
-    io.to(senderId).emit('receive_message', data);
-    console.log(`💬 Message from ${senderName} to room ${receiverId}: ${message}`);
+    const { receiverId, senderId, message, senderName } = data;
+    const payload = {
+      senderId,
+      senderName,
+      receiverId,
+      message,
+      timestamp: new Date().toISOString()
+    };
+    if (receiverId) {
+      io.to(String(receiverId)).emit('receive_message', payload);
+    }
+    socket.emit('receive_message', payload);
   });
 
-  socket.on('disconnect', () => {
-    console.log(`🔌 Client disconnected: ${socket.id}`);
+  socket.on('disconnect', () => {});
+});
+
+// Middleware
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Database Connection
+const localDb = require('./utils/localDb');
+const connectDB = require('./config/db');
+
+if (process.env.MONGODB_URI) {
+  connectDB();
+} else {
+  console.log('[Database]: Using High-Performance JSON Storage Mode.');
+}
+
+// Ensure Uploads Directory Exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// API Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/medicines', require('./routes/medicines'));
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/reservations', require('./routes/reservations'));
+app.use('/api/prescriptions', require('./routes/prescriptions'));
+app.use('/api/pharmacies', require('./routes/pharmacies'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/ai', require('./routes/ai'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/docs', require('./routes/docs'));
+app.use('/docs', require('./routes/docs'));
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'online',
+    system: 'MediFind 2.0 API',
+    timestamp: new Date().toISOString(),
+    database: localDb.isUsingMongo() ? 'MongoDB' : 'Local JSON DB'
   });
 });
 
-// Connect to Database & Start Server
+// Periodic Expiry Worker: Runs every 60 seconds to release expired 30-min holds
+setInterval(() => {
+  checkAndReleaseExpiredReservations(io);
+}, 60 * 1000);
+
+// Global Error Handler Middleware
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
-
-const startServer = async () => {
-  // Connect to Database (MongoDB or fallback local file database)
-  await connectDB();
-
-  // Run database seeder if applicable
-  await seedData();
-
-  server.listen(PORT, () => {
-    console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  });
-};
-
-startServer().catch(err => {
-  console.error('Failed to start server:', err);
+server.listen(PORT, () => {
+  console.log(`🚀 MediFind 2.0 API Server running on port ${PORT}`);
+  console.log(`📚 Interactive API Documentation: http://localhost:${PORT}/docs`);
 });

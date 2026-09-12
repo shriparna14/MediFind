@@ -21,8 +21,9 @@ import {
 import {
   Plus, Edit2, Trash2, Check, X, AlertCircle, ShoppingBag, Truck, ClipboardList, FileText,
   TrendingUp, Layers, HelpCircle, Activity, ShieldAlert, Phone, RefreshCw, BadgeAlert,
-  ChevronRight, Calendar, UserCheck, LayoutDashboard, Pill, LogOut, CheckSquare
+  ChevronRight, Calendar, UserCheck, LayoutDashboard, Pill, LogOut, CheckSquare, Sparkles, Clock, AlertTriangle
 } from 'lucide-react';
+import { aiApi } from '../services/aiApi';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
@@ -57,6 +58,9 @@ export default function PharmacyDashboard() {
   const [reservations, setReservations] = useState([]);
   const [orders, setOrders] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
+  const [forecastData, setForecastData] = useState([]);
+  const [aiAdvice, setAiAdvice] = useState(null);
+  const [isAiAdvising, setIsAiAdvising] = useState(false);
 
   // Modal / Form triggers
   const [showAddForm, setShowAddForm] = useState(false);
@@ -92,11 +96,30 @@ export default function PharmacyDashboard() {
       const pRes = await pharmacyService.getPrescriptions();
       if (pRes.data.success) setPrescriptions(pRes.data.data);
 
+      const fRes = await pharmacyService.getDemandPrediction().catch(() => ({ data: { success: false } }));
+      if (fRes.data?.success) setForecastData(fRes.data.data);
+
     } catch (err) {
       console.error('Error fetching pharmacy dashboard:', err);
       setMessage({ type: 'error', text: 'Error retrieving catalog records.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch AI Inventory Advice
+  const handleGetAiAdvice = async () => {
+    try {
+      setIsAiAdvising(true);
+      const res = await aiApi.getInventoryAdvice();
+      if (res.success) {
+        setAiAdvice(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to get AI inventory advice:', err);
+      setMessage({ type: 'error', text: 'Could not generate AI inventory advice.' });
+    } finally {
+      setIsAiAdvising(false);
     }
   };
 
@@ -533,46 +556,196 @@ export default function PharmacyDashboard() {
 
               </div>
 
-              {/* Chart & Alerts */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Chart, Low Stock & Expiring Soon Alerts */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 {/* 7. Revenue Chart */}
-                <div className="lg:col-span-8 bg-white border border-slate-200/60 rounded-3xl p-5.5 shadow-sm">
+                <div className="lg:col-span-6 bg-white border border-slate-200/60 rounded-3xl p-5.5 shadow-sm">
                   <h3 className="font-outfit font-bold text-xs text-slate-500 uppercase tracking-wide mb-4">Gross Revenue Chart</h3>
-                  <div className="h-60 flex items-center justify-center">
+                  <div className="h-56 flex items-center justify-center">
                     <Line data={revenueChartData} options={{ responsive: true, maintainAspectRatio: false }} />
                   </div>
                 </div>
 
                 {/* 5. Low Stock Alerts Card */}
-                <div className="lg:col-span-4 bg-white border border-slate-200/60 rounded-3xl p-5.5 shadow-sm flex flex-col gap-4.5">
-                  <h3 className="font-outfit font-bold text-xs text-slate-500 uppercase tracking-wide">Critical Low Stock Warnings</h3>
+                <div className="lg:col-span-3 bg-white border border-slate-200/60 rounded-3xl p-5.5 shadow-sm flex flex-col gap-3.5">
+                  <h3 className="font-outfit font-bold text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
+                    <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Low Stock Warnings</span>
+                  </h3>
                   
-                  <div className="flex-1 overflow-y-auto max-h-56 pr-1 flex flex-col gap-2.5">
+                  <div className="flex-1 overflow-y-auto max-h-56 pr-1 flex flex-col gap-2">
                     {medicines.filter(m => m.stock < 10).length > 0 ? (
                       medicines
                         .filter(m => m.stock < 10)
                         .map(med => (
-                          <div key={med.id || med._id} className="p-3 bg-rose-50/50 border border-rose-100 rounded-xl flex justify-between items-center text-xs">
-                            <div>
-                              <span className="font-bold text-slate-800 block">{med.name}</span>
-                              <span className="text-[9px] text-slate-400 font-semibold">{med.brand}</span>
+                          <div key={med.id || med._id} className="p-2.5 bg-rose-50/50 border border-rose-100 rounded-xl flex justify-between items-center text-xs">
+                            <div className="min-w-0 pr-2">
+                              <span className="font-bold text-slate-800 block truncate">{med.name}</span>
+                              <span className="text-[9px] text-slate-400 font-semibold truncate block">{med.brand}</span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded font-extrabold text-[9px]
+                            <span className={`px-2 py-0.5 rounded font-extrabold text-[9px] shrink-0
                               ${med.stock === 0 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
                               {med.stock === 0 ? 'Out of Stock' : `${med.stock} units`}
                             </span>
                           </div>
                         ))
                     ) : (
-                      <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-10">
-                        <CheckSquare className="w-8 h-8 mb-2" />
+                      <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-8">
+                        <CheckSquare className="w-6 h-6 mb-1 text-emerald-500" />
                         <span className="text-xs">Stocks are healthy.</span>
                       </div>
                     )}
                   </div>
                 </div>
 
+                {/* 11. Expiring Soon Alerts Card */}
+                <div className="lg:col-span-3 bg-white border border-slate-200/60 rounded-3xl p-5.5 shadow-sm flex flex-col gap-3.5">
+                  <h3 className="font-outfit font-bold text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Expiring Soon</span>
+                  </h3>
+                  
+                  <div className="flex-1 overflow-y-auto max-h-56 pr-1 flex flex-col gap-2">
+                    {medicines
+                      .filter(m => m.expiryDate)
+                      .map(m => {
+                        const diffDays = Math.ceil((new Date(m.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                        return { ...m, daysUntilExpiry: diffDays };
+                      })
+                      .filter(m => m.daysUntilExpiry <= 90)
+                      .sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry).length > 0 ? (
+                      medicines
+                        .filter(m => m.expiryDate)
+                        .map(m => {
+                          const diffDays = Math.ceil((new Date(m.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                          return { ...m, daysUntilExpiry: diffDays };
+                        })
+                        .filter(m => m.daysUntilExpiry <= 90)
+                        .sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry)
+                        .map(med => (
+                          <div key={med.id || med._id} className="p-2.5 bg-amber-50/50 border border-amber-100 rounded-xl flex justify-between items-center text-xs">
+                            <div className="min-w-0 pr-2">
+                              <span className="font-bold text-slate-800 block truncate">{med.name}</span>
+                              <span className="text-[9px] text-slate-400 font-mono-plex">Exp: {new Date(med.expiryDate).toLocaleDateString()}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded font-extrabold text-[9px] shrink-0
+                              ${med.daysUntilExpiry <= 0 
+                                ? 'bg-rose-100 text-rose-700' 
+                                : med.daysUntilExpiry <= 14 
+                                ? 'bg-amber-100 text-amber-700' 
+                                : 'bg-slate-100 text-slate-700'}`}>
+                              {med.daysUntilExpiry <= 0 ? 'Expired' : `${med.daysUntilExpiry} days`}
+                            </span>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-8">
+                        <CheckSquare className="w-6 h-6 mb-1 text-emerald-500" />
+                        <span className="text-xs">No batches expiring soon.</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 12 & 13. Demand Prediction & AI Restock Advisor */}
+              <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex justify-between items-center flex-wrap gap-3">
+                  <div>
+                    <h3 className="font-outfit font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                      <span>📉 Demand Prediction & Restock Forecast</span>
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Velocity calculated from 30-day live customer orders, reservations, and search frequencies.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleGetAiAdvice}
+                    disabled={isAiAdvising}
+                    className="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/80 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Sparkles className={`w-3.5 h-3.5 text-brand-600 ${isAiAdvising ? 'animate-spin' : ''}`} />
+                    <span>{isAiAdvising ? 'Consulting AI...' : 'Ask AI Restock Advisor'}</span>
+                  </button>
+                </div>
+
+                {/* AI Advice Summary Banner */}
+                {aiAdvice && (
+                  <div className="p-3.5 bg-brand-50/80 border border-brand-200/80 rounded-2xl text-xs text-brand-900 leading-relaxed animate-fade-in flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-brand-600 mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-bold block text-brand-950 mb-0.5">MediFind AI Restock Assessment</span>
+                      <p className="text-[11px] text-brand-800">{aiAdvice.summary}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Forecast Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
+                        <th className="pb-2.5">Medicine Formulation</th>
+                        <th className="pb-2.5">Current Stock</th>
+                        <th className="pb-2.5">Avg Daily Demand</th>
+                        <th className="pb-2.5">Predicted Stockout</th>
+                        <th className="pb-2.5">Recommended Restock</th>
+                        <th className="pb-2.5">Urgency</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {forecastData.slice(0, 6).map((item, idx) => (
+                        <tr key={item.medicineId || idx} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-2.5 font-bold text-slate-800">
+                            {item.name}
+                            <span className="block text-[9px] font-normal text-slate-400">{item.genericName || item.category}</span>
+                          </td>
+                          <td className="py-2.5 font-mono-plex font-semibold text-slate-700">
+                            {item.currentStock} units
+                          </td>
+                          <td className="py-2.5 font-mono-plex text-slate-600">
+                            {item.dailySalesVelocity} / day
+                          </td>
+                          <td className="py-2.5 font-mono-plex">
+                            <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                              item.daysUntilStockout <= 3 
+                                ? 'bg-rose-100 text-rose-700' 
+                                : item.daysUntilStockout <= 7 
+                                ? 'bg-amber-100 text-amber-700' 
+                                : 'bg-emerald-50 text-emerald-700'
+                            }`}>
+                              {item.daysUntilStockout === 0 ? 'Stockout Today' : `${item.daysUntilStockout} days`}
+                            </span>
+                          </td>
+                          <td className="py-2.5 font-mono-plex font-bold text-brand-600">
+                            +{item.suggestedReorderQuantity} units
+                          </td>
+                          <td className="py-2.5">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${
+                              item.urgency === 'CRITICAL' 
+                                ? 'bg-rose-50 text-rose-600 border border-rose-200' 
+                                : item.urgency === 'HIGH' 
+                                ? 'bg-amber-50 text-amber-600 border border-amber-200' 
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {item.urgency}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                      {forecastData.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="text-center py-6 text-slate-400 text-xs">
+                            No forecasting items computed yet. Add catalog medicines to see live stockout projections.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
             </div>

@@ -1,159 +1,171 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { logAudit } = require('../utils/auditLogger');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'medifind_super_secret_key_123_456', {
-    expiresIn: '30d'
-  });
+// Generate JWT Token
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id || user.id, role: user.role },
+    process.env.JWT_SECRET || 'fallback_jwt_secret_medifind_2026',
+    { expiresIn: process.env.JWT_EXPIRE || '7d' }
+  );
 };
 
-// @desc    Register a new user (customer/pharmacy)
-// @route   POST /api/auth/register
-// @access  Public
-exports.register = async (req, res) => {
+/**
+ * @desc    Register a user (customer or pharmacy only)
+ * @route   POST /api/auth/register
+ * @access  Public
+ */
+const register = async (req, res, next) => {
   try {
     const { name, email, password, role, phone, address, shopName, latitude, longitude, license } = req.body;
 
+    // Security Guard: Hard-block public admin registration
+    if (role && role.toLowerCase() === 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Security Violation: Administrator accounts cannot be created via public registration.'
+      });
+    }
+
+    const assignedRole = role && role.toLowerCase() === 'pharmacy' ? 'pharmacy' : 'customer';
+
     // Check if user exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ success: false, message: 'User already exists with this email' });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email address already exists.'
+      });
     }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user payload
-    const userPayload = {
+    const userData = {
       name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
-      role: role || 'customer',
+      role: assignedRole,
       phone,
       address,
-      shopName: role === 'pharmacy' ? shopName : undefined,
-      latitude: role === 'pharmacy' ? Number(latitude || 0) : undefined,
-      longitude: role === 'pharmacy' ? Number(longitude || 0) : undefined,
-      license: role === 'pharmacy' ? license : undefined,
-      isApproved: role !== 'pharmacy' // Pharmacy requires admin approval, customers and admins do not
+      shopName: assignedRole === 'pharmacy' ? (shopName || name) : '',
+      latitude: assignedRole === 'pharmacy' ? (Number(latitude) || 12.9716) : 12.9716,
+      longitude: assignedRole === 'pharmacy' ? (Number(longitude) || 77.5946) : 77.5946,
+      license: assignedRole === 'pharmacy' ? license : '',
+      isApproved: assignedRole !== 'pharmacy' // Pharmacies require admin approval
     };
 
-    // Create user
-    const user = await User.create(userPayload);
+    const user = await User.create(userData);
+    const token = generateToken(user);
 
-    // If customer/admin, generate token and login immediately. For pharmacy, notify approval is pending.
-    if (user.role === 'pharmacy') {
-      return res.status(201).json({
-        success: true,
-        message: 'Pharmacy registered successfully! Awaiting administrator approval before you can log in.',
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          isApproved: false
-        }
-      });
-    }
+    await logAudit('USER_REGISTER', {
+      userId: user._id || user.id,
+      details: { role: user.role, email: user.email }
+    }, req);
 
-    const token = generateToken(user._id);
     res.status(201).json({
       success: true,
+      message: assignedRole === 'pharmacy'
+        ? 'Pharmacy account created! Awaiting administrator license verification before listing.'
+        : 'Account created successfully!',
       token,
       user: {
-        id: user._id,
+        id: user._id || user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        address: user.address,
+        phone: user.phone,
+        shopName: user.shopName,
+        isApproved: user.isApproved
       }
     });
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ success: false, message: 'Server error during registration' });
+  } catch (err) {
+    next(err);
   }
 };
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
-exports.login = async (req, res) => {
+/**
+ * @desc    Login user & get token
+ * @route   POST /api/auth/login
+ * @access  Public
+ */
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Check for user email
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide email and password.' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     }
 
     // Check if pharmacy is approved
     if (user.role === 'pharmacy' && !user.isApproved) {
       return res.status(403).json({
         success: false,
-        message: 'Your pharmacy account is pending administrator approval. Please wait or contact support.'
+        message: 'Your pharmacy license verification is pending approval by the administrator.'
       });
     }
 
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
-    }
+    const token = generateToken(user);
 
-    const token = generateToken(user._id);
+    await logAudit(user.role === 'admin' ? 'ADMIN_LOGIN' : 'USER_LOGIN', {
+      userId: user._id || user.id,
+      details: { role: user.role, email: user.email }
+    }, req);
+
     res.json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        shopName: user.shopName,
-        phone: user.phone,
-        address: user.address
-      }
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Server error during login' });
-  }
-};
-
-// @desc    Get current logged in user details
-// @route   GET /api/auth/me
-// @access  Private
-exports.getMe = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    // Don't return password
-    const userObj = { ...user };
-    delete userObj.password;
-
-    res.json({
-      success: true,
       user: {
         id: user._id || user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        phone: user.phone,
         address: user.address,
+        phone: user.phone,
         shopName: user.shopName,
+        isApproved: user.isApproved,
         latitude: user.latitude,
-        longitude: user.longitude,
-        license: user.license,
-        isApproved: user.isApproved
+        longitude: user.longitude
       }
     });
-  } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+  } catch (err) {
+    next(err);
   }
+};
+
+/**
+ * @desc    Get currently authenticated user profile
+ * @route   GET /api/auth/me
+ * @access  Private
+ */
+const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    res.json({ success: true, user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getMe
 };

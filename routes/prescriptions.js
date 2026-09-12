@@ -7,64 +7,49 @@ const {
   uploadPrescription,
   getMyPrescriptions,
   getPharmacyPrescriptions,
-  updatePrescriptionStatus
+  updatePrescriptionStatus,
+  getSecurePrescriptionFile
 } = require('../controllers/prescriptionController');
 const { protect, authorize } = require('../middleware/auth');
 
-// Ensure local uploads directory exists
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+// Multer Storage Configuration
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer storage engine configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, UPLOADS_DIR);
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'presc-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-// File filter (accept jpg, jpeg, png, pdf)
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+  const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
   const ext = path.extname(file.originalname).toLowerCase();
-  
-  if (allowedExtensions.includes(ext)) {
+  const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
+
+  if (allowedMimes.includes(file.mimetype) && allowedExts.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPG, JPEG, PNG, and PDF files are allowed.'), false);
+    cb(new Error('Invalid file format. Only JPEG, PNG, WEBP, and PDF files are permitted.'), false);
   }
 };
 
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // Max 5MB limit
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter
 });
 
-// Error handling middleware for Multer errors
-const handleMulterError = (err, req, res, next) => {
-  if (err) {
-    return res.status(400).json({ success: false, message: err.message });
-  }
-  next();
-};
-
-router.post(
-  '/',
-  protect,
-  authorize('customer'),
-  upload.single('prescription'),
-  handleMulterError,
-  uploadPrescription
-);
-
+router.post('/', protect, authorize('customer'), upload.single('prescription'), uploadPrescription);
 router.get('/my', protect, authorize('customer'), getMyPrescriptions);
 router.get('/pharmacy', protect, authorize('pharmacy'), getPharmacyPrescriptions);
 router.put('/:id/status', protect, authorize('pharmacy'), updatePrescriptionStatus);
+router.get('/file/:filename', protect, getSecurePrescriptionFile);
 
 module.exports = router;

@@ -1,216 +1,265 @@
-const fs = require('fs');
 const path = require('path');
-const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
 const Prescription = require('../models/Prescription');
-const User = require('../models/User');
+const Notification = require('../models/Notification');
+const localDb = require('../utils/localDb');
+const { logAudit } = require('../utils/auditLogger');
 
-// Configure Cloudinary if environment variables are set
-const isCloudinaryConfigured =
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET;
-
-if (isCloudinaryConfigured) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-  });
-} else {
-  console.log('⚠️  Cloudinary credentials not configured. Prescription uploads will be saved locally on server disk.');
-}
-
-// @desc    Upload a prescription
-// @route   POST /api/prescriptions
-// @access  Private (Customer only)
-exports.uploadPrescription = async (req, res) => {
+/**
+ * @desc    Upload prescription file with strict MIME and size checks
+ * @route   POST /api/prescriptions
+ * @access  Private (Customer)
+ */
+const uploadPrescription = async (req, res, next) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please upload a file' });
-    }
+    const { pharmacyId, notes = '' } = req.body;
+    const userId = req.user.id || req.user._id;
 
-    const { pharmacyId } = req.body;
     if (!pharmacyId) {
-      // Remove temp local file if validation fails
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-      return res.status(400).json({ success: false, message: 'Please specify the target pharmacyId' });
+      return res.status(400).json({ success: false, message: 'Please select a destination pharmacy.' });
     }
 
-    let imageUrl = '';
-
-    if (isCloudinaryConfigured) {
-      try {
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'medifind_prescriptions'
-        });
-        imageUrl = result.secure_url;
-
-        // Delete local temp file
-        if (fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
-        }
-      } catch (cloudinaryError) {
-        console.error('Cloudinary upload error, falling back to local file path:', cloudinaryError);
-        // Fallback to local server static URL if Cloudinary fails
-        imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-      }
-    } else {
-      // Local static storage URL
-      imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please attach a prescription file (JPG, PNG, or PDF).' });
     }
 
-    // Save to database
-    const prescription = await Prescription.create({
-      userId: req.user.id,
-      pharmacyId,
-      imageUrl,
-      status: 'pending'
-    });
-
-    const user = await User.findById(req.user.id);
-    const pharmacy = await User.findById(pharmacyId);
-
-    const prescData = typeof prescription.toObject === 'function' ? prescription.toObject() : prescription;
-    const enriched = {
-      ...prescData,
-      id: prescData.id || prescData._id,
-      customer: {
-        name: user.name,
-        phone: user.phone
-      },
-      pharmacy: {
-        shopName: pharmacy.shopName
-      }
-    };
-
-    // Socket alert to Pharmacy about incoming prescription
-    const io = req.app.get('socketio');
-    if (io) {
-      io.emit(`new_prescription_pharmacy_${pharmacyId}`, enriched);
-    }
-
-    res.status(201).json({ success: true, data: enriched });
-  } catch (error) {
-    console.error('Upload prescription error:', error);
-    // Attempt clean up of file if it exists
-    if (req.file && fs.existsSync(req.file.path)) {
-      try { fs.unlinkSync(req.file.path); } catch (e) {}
-    }
-    res.status(500).json({ success: false, message: 'Server error uploading prescription' });
-  }
-};
-
-// @desc    Get customer's prescriptions
-// @route   GET /api/prescriptions/my
-// @access  Private (Customer only)
-exports.getMyPrescriptions = async (req, res) => {
-  try {
-    const prescriptions = await Prescription.find({ userId: req.user.id });
-    
-    const enriched = await Promise.all(
-      prescriptions.map(async (p) => {
-        const pharmacy = await User.findById(p.pharmacyId);
-        const pData = typeof p.toObject === 'function' ? p.toObject() : p;
-        const pObj = {
-          ...pData,
-          id: pData.id || pData._id
-        };
-        if (pharmacy) {
-          pObj.pharmacy = {
-            shopName: pharmacy.shopName,
-            address: pharmacy.address
-          };
-        }
-        return pObj;
-      })
-    );
-
-    enriched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    res.json({ success: true, count: enriched.length, data: enriched });
-  } catch (error) {
-    console.error('Get my prescriptions error:', error);
-    res.status(500).json({ success: false, message: 'Server error retrieving prescriptions' });
-  }
-};
-
-// @desc    Get pharmacy's prescriptions
-// @route   GET /api/prescriptions/pharmacy
-// @access  Private (Pharmacy only)
-exports.getPharmacyPrescriptions = async (req, res) => {
-  try {
-    const prescriptions = await Prescription.find({ pharmacyId: req.user.id });
-
-    const enriched = await Promise.all(
-      prescriptions.map(async (p) => {
-        const customer = await User.findById(p.userId);
-        const pData = typeof p.toObject === 'function' ? p.toObject() : p;
-        const pObj = {
-          ...pData,
-          id: pData.id || pData._id
-        };
-        if (customer) {
-          pObj.customer = {
-            name: customer.name,
-            phone: customer.phone,
-            email: customer.email
-          };
-        }
-        return pObj;
-      })
-    );
-
-    enriched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    res.json({ success: true, count: enriched.length, data: enriched });
-  } catch (error) {
-    console.error('Get pharmacy prescriptions error:', error);
-    res.status(500).json({ success: false, message: 'Server error retrieving prescriptions' });
-  }
-};
-
-// @desc    Update prescription status (Approve/Reject)
-// @route   PUT /api/prescriptions/:id/status
-// @access  Private (Pharmacy only)
-exports.updatePrescriptionStatus = async (req, res) => {
-  try {
-    const { status } = req.body; // 'approved' or 'rejected'
-    
-    if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Status must be approved or rejected' });
-    }
-
-    const prescription = await Prescription.findById(req.params.id);
-    if (!prescription) {
-      return res.status(404).json({ success: false, message: 'Prescription not found' });
-    }
-
-    // Verify pharmacy ownership
-    if (String(prescription.pharmacyId) !== String(req.user.id)) {
-      return res.status(403).json({ success: false, message: 'Not authorized to verify this prescription' });
-    }
-
-    const updated = await Prescription.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
-
-    // Socket alert customer about prescription verification
-    const io = req.app.get('socketio');
-    if (io) {
-      io.emit(`prescription_status_user_${prescription.userId}`, {
-        prescriptionId: prescription._id || prescription.id,
-        status: status
+    // MIME Validation
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedMimes.includes(req.file.mimetype)) {
+      if (req.file.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file format. Only JPEG, PNG, WEBP, and PDF files are permitted.'
       });
     }
 
-    res.json({ success: true, data: updated });
-  } catch (error) {
-    console.error('Update prescription status error:', error);
-    res.status(500).json({ success: false, message: 'Server error updating prescription' });
+    // 5MB Size Validation
+    const maxSize = 5 * 1024 * 1024;
+    if (req.file.size > maxSize) {
+      if (req.file.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        message: 'File size exceeds the 5MB maximum limit.'
+      });
+    }
+
+    // Secure local or Cloudinary storage path
+    const fileUrl = req.file.path
+      ? `/api/prescriptions/file/${path.basename(req.file.path)}`
+      : `/api/prescriptions/file/${req.file.filename}`;
+
+    const prescriptionData = {
+      userId,
+      pharmacyId,
+      imageUrl: fileUrl,
+      fileType: req.file.mimetype,
+      fileSize: req.file.size,
+      notes,
+      status: 'pending'
+    };
+
+    let prescription = null;
+    if (localDb.isUsingMongo()) {
+      prescription = await Prescription.create(prescriptionData);
+    } else {
+      prescription = await localDb.Prescription.create(prescriptionData);
+    }
+
+    const populated = await Prescription.findById(prescription._id || prescription.id)
+      .populate('pharmacyId', 'shopName address')
+      .populate('userId', 'name phone email');
+
+    // Notify pharmacy via Socket.io
+    const io = req.app.get('socketio');
+    if (io) {
+      io.to(String(pharmacyId)).emit('new_prescription', populated || prescription);
+    }
+
+    if (localDb.isUsingMongo()) {
+      await Notification.create({
+        userId: pharmacyId,
+        title: '📄 New Prescription Uploaded',
+        message: `${req.user.name} uploaded a prescription for verification.`,
+        type: 'PRESCRIPTION',
+        referenceId: prescription._id,
+        referenceModel: 'Prescription'
+      });
+    }
+
+    await logAudit('PRESCRIPTION_UPLOADED', {
+      userId,
+      pharmacyId,
+      targetId: prescription._id || prescription.id,
+      targetModel: 'Prescription',
+      details: { fileType: req.file.mimetype, fileSize: req.file.size }
+    }, req);
+
+    res.status(201).json({
+      success: true,
+      message: 'Prescription uploaded securely for pharmacy verification!',
+      data: populated || prescription
+    });
+  } catch (err) {
+    next(err);
   }
+};
+
+/**
+ * @desc    Get prescriptions uploaded by authenticated customer
+ * @route   GET /api/prescriptions/my
+ * @access  Private (Customer)
+ */
+const getMyPrescriptions = async (req, res, next) => {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    if (localDb.isUsingMongo()) {
+      const prescriptions = await Prescription.find({ userId })
+        .populate('pharmacyId', 'shopName address phone')
+        .sort({ createdAt: -1 });
+
+      res.json({ success: true, count: prescriptions.length, data: prescriptions });
+    } else {
+      const prescriptions = (await localDb.Prescription.find({ userId })) || [];
+      res.json({ success: true, count: prescriptions.length, data: prescriptions });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @desc    Get prescriptions received by pharmacy
+ * @route   GET /api/prescriptions/pharmacy
+ * @access  Private (Pharmacy)
+ */
+const getPharmacyPrescriptions = async (req, res, next) => {
+  try {
+    const pharmacyId = req.user.id || req.user._id;
+
+    if (localDb.isUsingMongo()) {
+      const prescriptions = await Prescription.find({ pharmacyId })
+        .populate('userId', 'name email phone address')
+        .sort({ createdAt: -1 });
+
+      res.json({ success: true, count: prescriptions.length, data: prescriptions });
+    } else {
+      const prescriptions = (await localDb.Prescription.find({ pharmacyId })) || [];
+      res.json({ success: true, count: prescriptions.length, data: prescriptions });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @desc    Update prescription status (Approve / Reject)
+ * @route   PUT /api/prescriptions/:id/status
+ * @access  Private (Pharmacy)
+ */
+const updatePrescriptionStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status, rejectionReason = '' } = req.body;
+
+    if (!['pending', 'approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Status must be pending, approved, or rejected.' });
+    }
+
+    let prescription = null;
+    if (localDb.isUsingMongo()) {
+      prescription = await Prescription.findById(id);
+      if (!prescription) {
+        return res.status(404).json({ success: false, message: 'Prescription not found.' });
+      }
+
+      prescription.status = status;
+      if (status === 'rejected') {
+        prescription.rejectionReason = rejectionReason;
+      }
+      await prescription.save();
+    } else {
+      prescription = await localDb.Prescription.findById(id);
+      if (prescription) {
+        prescription.status = status;
+        prescription.rejectionReason = rejectionReason;
+      }
+    }
+
+    const populated = await Prescription.findById(id)
+      .populate('pharmacyId', 'shopName address phone')
+      .populate('userId', 'name phone email');
+
+    // Broadcast to customer
+    const io = req.app.get('socketio');
+    if (io && populated) {
+      io.to(String(populated.userId._id || populated.userId)).emit('prescription_status', {
+        prescriptionId: prescription._id,
+        status,
+        rejectionReason,
+        prescription: populated
+      });
+    }
+
+    await logAudit(status === 'approved' ? 'PRESCRIPTION_APPROVED' : 'PRESCRIPTION_REJECTED', {
+      targetId: id,
+      targetModel: 'Prescription',
+      details: { status, rejectionReason }
+    }, req);
+
+    res.json({
+      success: true,
+      message: `Prescription marked as ${status}`,
+      data: populated || prescription
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * @desc    Securely stream/serve authenticated prescription file
+ * @route   GET /api/prescriptions/file/:filename
+ * @access  Private (Patient / Destination Pharmacy / Admin only)
+ */
+const getSecurePrescriptionFile = async (req, res, next) => {
+  try {
+    const { filename } = req.params;
+
+    // Look up prescription record
+    const prescription = await Prescription.findOne({
+      imageUrl: new RegExp(filename, 'i')
+    });
+
+    if (prescription) {
+      const currentUserId = String(req.user.id || req.user._id);
+      const isOwner = String(prescription.userId) === currentUserId;
+      const isAssignedPharmacy = String(prescription.pharmacyId) === currentUserId;
+      const isAdmin = req.user.role === 'admin';
+
+      if (!isOwner && !isAssignedPharmacy && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You are not authorized to view this prescription document.'
+        });
+      }
+    }
+
+    const filePath = path.join(__dirname, '..', 'uploads', filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: 'Prescription document file not found.' });
+    }
+
+    res.sendFile(filePath);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  uploadPrescription,
+  getMyPrescriptions,
+  getPharmacyPrescriptions,
+  updatePrescriptionStatus,
+  getSecurePrescriptionFile
 };

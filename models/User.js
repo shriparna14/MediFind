@@ -4,7 +4,8 @@ const localDb = require('../utils/localDb');
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   email: {
     type: String,
@@ -37,15 +38,29 @@ const UserSchema = new mongoose.Schema({
   },
   latitude: {
     type: Number,
-    default: 0
+    default: 12.9716
   },
   longitude: {
     type: Number,
-    default: 0
+    default: 77.5946
   },
   license: {
     type: String,
     default: ''
+  },
+  openingHours: {
+    type: String,
+    default: '8:00 AM - 11:00 PM'
+  },
+  rating: {
+    type: Number,
+    default: 4.8,
+    min: 1,
+    max: 5
+  },
+  reviewCount: {
+    type: Number,
+    default: 0
   },
   isApproved: {
     type: Boolean,
@@ -57,6 +72,9 @@ const UserSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+UserSchema.index({ latitude: 1, longitude: 1 });
+UserSchema.index({ role: 1, isApproved: 1 });
 
 const UserModel = mongoose.model('User', UserSchema);
 

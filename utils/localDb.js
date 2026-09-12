@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 
@@ -41,11 +42,9 @@ class LocalCollection {
     const data = this._read();
     return data.filter(item => {
       for (const key in filter) {
-        // Simple regex support for text search
         if (filter[key] instanceof RegExp) {
           if (!filter[key].test(item[key] || '')) return false;
         } else if (typeof filter[key] === 'object' && filter[key] !== null) {
-          // Handle operator searches like $lt, $gt, $in, $ne
           const operators = filter[key];
           for (const op in operators) {
             const val = operators[op];
@@ -69,7 +68,6 @@ class LocalCollection {
             }
           }
         } else {
-          // Check simple equality
           if (item[key] !== filter[key]) return false;
         }
       }
@@ -84,7 +82,7 @@ class LocalCollection {
 
   async findById(id) {
     const items = this._read();
-    return items.find(item => item._id === id || String(item._id) === String(id)) || null;
+    return items.find(item => item._id === id || String(item._id) === String(id) || item.id === id) || null;
   }
 
   async create(doc) {
@@ -102,12 +100,10 @@ class LocalCollection {
 
   async findByIdAndUpdate(id, update, options = {}) {
     const items = this._read();
-    const index = items.findIndex(item => item._id === id || String(item._id) === String(id));
+    const index = items.findIndex(item => item._id === id || String(item._id) === String(id) || item.id === id);
     if (index === -1) return null;
 
     const currentDoc = items[index];
-    
-    // Process Mongoose-like $set, $inc, etc. if they are used, otherwise merge simple updates
     let updatedDoc = { ...currentDoc, updatedAt: new Date().toISOString() };
     
     if (update.$set) {
@@ -127,7 +123,7 @@ class LocalCollection {
 
   async findByIdAndDelete(id) {
     const items = this._read();
-    const index = items.findIndex(item => item._id === id || String(item._id) === String(id));
+    const index = items.findIndex(item => item._id === id || String(item._id) === String(id) || item.id === id);
     if (index === -1) return null;
     const deleted = items.splice(index, 1)[0];
     this._write(items);
@@ -154,11 +150,18 @@ class LocalCollection {
   }
 }
 
+const isUsingMongo = () => {
+  return Boolean(process.env.MONGODB_URI);
+};
+
 module.exports = {
+  isUsingMongo,
   User: new LocalCollection('users'),
   Medicine: new LocalCollection('medicines'),
   Reservation: new LocalCollection('reservations'),
   Order: new LocalCollection('orders'),
   Prescription: new LocalCollection('prescriptions'),
+  Review: new LocalCollection('reviews'),
+  Notification: new LocalCollection('notifications'),
   SearchLog: new LocalCollection('searchlogs')
 };

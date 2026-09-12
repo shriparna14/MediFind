@@ -1,0 +1,134 @@
+[
+  {
+    "userId": "6aa59d54e2c8a4ef49407741",
+    "title": "📋 Reservation Confirmed",
+    "message": "Your 30-minute hold reservation is active. Please present your pickup code at the counter.",
+    "type": "RESERVATION",
+    "read": true,
+    "_id": "6aa59d56e2c8a4ef49407959",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.584Z",
+    "updatedAt": "2026-09-12T18:43:34.584Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407742",
+    "title": "🚨 Delivery Dispatched",
+    "message": "Pharmacy rider has picked up your medicine parcel and is en-route.",
+    "type": "ORDER",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef4940795a",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407743",
+    "title": "📋 Reservation Confirmed",
+    "message": "Your 30-minute hold reservation is active. Please present your pickup code at the counter.",
+    "type": "RESERVATION",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef4940795b",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407744",
+    "title": "🚨 Delivery Dispatched",
+    "message": "Pharmacy rider has picked up your medicine parcel and is en-route.",
+    "type": "ORDER",
+    "read": true,
+    "_id": "6aa59d56e2c8a4ef4940795c",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407745",
+    "title": "📋 Reservation Confirmed",
+    "message": "Your 30-minute hold reservation is active. Please present your pickup code at the counter.",
+    "type": "RESERVATION",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef4940795d",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407746",
+    "title": "🚨 Delivery Dispatched",
+    "message": "Pharmacy rider has picked up your medicine parcel and is en-route.",
+    "type": "ORDER",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef4940795e",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407747",
+    "title": "📋 Reservation Confirmed",
+    "message": "Your 30-minute hold reservation is active. Please present your pickup code at the counter.",
+    "type": "RESERVATION",
+    "read": true,
+    "_id": "6aa59d56e2c8a4ef4940795f",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407748",
+    "title": "🚨 Delivery Dispatched",
+    "message": "Pharmacy rider has picked up your medicine parcel and is en-route.",
+    "type": "ORDER",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef49407960",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef49407749",
+    "title": "📋 Reservation Confirmed",
+    "message": "Your 30-minute hold reservation is active. Please present your pickup code at the counter.",
+    "type": "RESERVATION",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef49407961",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774a",
+    "title": "🚨 Delivery Dispatched",
+    "message": "Pharmacy rider has picked up your medicine parcel and is en-route.",
+    "type": "ORDER",
+    "read": true,
+    "_id": "6aa59d56e2c8a4ef49407962",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774b",
+    "title": "📋 Reservation Confirmed",
+    "message": "Your 30-minute hold reservation is active. Please present your pickup code at the counter.",
+    "type": "RESERVATION",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef49407963",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  },
+  {
+    "userId": "6aa59d54e2c8a4ef4940774c",
+    "title": "🚨 Delivery Dispatched",
+    "message": "Pharmacy rider has picked up your medicine parcel and is en-route.",
+    "type": "ORDER",
+    "read": false,
+    "_id": "6aa59d56e2c8a4ef49407964",
+    "__v": 0,
+    "createdAt": "2026-09-12T18:43:34.585Z",
+    "updatedAt": "2026-09-12T18:43:34.585Z"
+  }
+]
