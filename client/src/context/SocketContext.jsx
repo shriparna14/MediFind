@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { SOCKET_URL } from '../config';
 
 const SocketContext = createContext(null);
 
@@ -10,7 +11,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Connect to backend Socket.IO
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
 
     console.log('🔌 Attempting Socket connection...');

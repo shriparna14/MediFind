@@ -14,16 +14,40 @@ const app = express();
 const server = http.createServer(app);
 
 // Allowed Origins for CORS
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
+const configuredOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map(url => url.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+const defaultOrigins = [
+  'http://localhost:5173',
   'http://localhost:3000',
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173',
+  'http://localhost:5000'
 ];
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // allow non-browser / server-to-server / curl
+  if (process.env.CLIENT_URL === '*' || configuredOrigins.includes('*')) return true;
+  if (defaultOrigins.includes(origin) || configuredOrigins.includes(origin)) return true;
+  // Allow cloud deployment platforms automatically
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  if (/^https:\/\/.*\.onrender\.com$/.test(origin)) return true;
+  if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return true;
+  if (/^https:\/\/.*\.netlify\.app$/.test(origin)) return true;
+  return false;
+};
 
 // Socket.IO Setup
 const io = socketIo(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   }
@@ -62,7 +86,7 @@ io.on('connection', (socket) => {
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -118,6 +142,18 @@ app.get('/api/health', (req, res) => {
 setInterval(() => {
   checkAndReleaseExpiredReservations(io);
 }, 60 * 1000);
+
+// Serve Frontend Static Build in Production / Render deployment if present
+const clientDist = path.join(__dirname, 'client', 'dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/docs') || req.path.startsWith('/socket.io')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 // Global Error Handler Middleware
 app.use(errorHandler);
