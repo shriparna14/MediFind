@@ -19,6 +19,14 @@ const validateRegister = (req, res, next) => {
     return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
   }
 
+  if (!phone || typeof phone !== 'string' || phone.trim().length < 5) {
+    return res.status(400).json({ success: false, message: 'Contact phone number is required.' });
+  }
+
+  if (!address || typeof address !== 'string' || address.trim().length < 3) {
+    return res.status(400).json({ success: false, message: 'Address is required.' });
+  }
+
   // Security check: Public registration MUST NOT allow 'admin'
   if (role && role.toLowerCase() === 'admin') {
     return res.status(403).json({
