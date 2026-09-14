@@ -19,17 +19,18 @@ const configuredOrigins = (process.env.CLIENT_URL || '')
   .map(url => url.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
-const defaultOrigins = [
+const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
-  'http://localhost:5000'
+  'http://localhost:5000',
+  ...configuredOrigins
 ];
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true; // allow non-browser / server-to-server / curl
   if (process.env.CLIENT_URL === '*' || configuredOrigins.includes('*')) return true;
-  if (defaultOrigins.includes(origin) || configuredOrigins.includes(origin)) return true;
+  if (allowedOrigins.includes(origin)) return true;
   // Allow cloud deployment platforms automatically
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
   if (/^https:\/\/.*\.onrender\.com$/.test(origin)) return true;

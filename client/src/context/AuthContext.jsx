@@ -1,9 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
 
 // Configure Axios Defaults
-axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.baseURL = `${import.meta.env.VITE_API_URL}/api`;
 
 const AuthContext = createContext(null);
 
