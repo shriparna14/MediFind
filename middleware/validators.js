@@ -4,7 +4,7 @@
 
 // Validate Registration Payload
 const validateRegister = (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, phone, address } = req.body;
 
   if (!name || typeof name !== 'string' || name.trim().length < 2) {
     return res.status(400).json({ success: false, message: 'Valid name with at least 2 characters is required.' });
