@@ -135,6 +135,15 @@ const extractSearchIntentRuleBased = (userPrompt) => {
     }
   }
 
+  // Route broad knowledge questions away from inventory search when no
+  // medicine or pharmacy topic was detected.
+  const isGeneralQuestion = /^(what is|who is|why is|how does|explain|tell me about|can you explain)\b/i.test(prompt);
+  const hasMedicineContext = intent.genericSalt || intent.category || /\b(medicine|drug|tablet|capsule|pharmacy|pharmacist|symptom|dose|dosage|treatment|fever|pain|allergy|cough|acid|infection)\b/i.test(prompt);
+  if (isGeneralQuestion && !hasMedicineContext) {
+    intent.intent = 'general';
+    intent.isMonographQuery = false;
+  }
+
   const cleaned = prompt
     .replace(/(?:find|search|where can i get|where is|i need|looking for|medicine for|tablet for|near me|under \d+|within \d+ km|cheapest|please|available)/gi, '')
     .trim();
@@ -270,10 +279,71 @@ const generateAIResponse = (intent, matchedMedicines = [], monograph = null) => 
   return explanation;
 };
 
+/**
+ * Generate a conversational answer for questions that are not inventory searches.
+ */
+const generateGeminiAnswer = async (userPrompt) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return 'AI service is currently unavailable. Please try a medicine or pharmacy search.';
+  }
+
+  const systemPrompt = `You are MediFind AI, an educational medicine and pharmacy assistant.
+
+You can:
+- answer general health and medicine-related questions
+- explain medicines and pharmacy concepts
+- explain basic technology and general knowledge questions
+- help users understand medicine information
+
+Safety rules:
+- Do not diagnose diseases.
+- Do not prescribe medicines.
+- Do not provide personalized dosage instructions.
+- Do not replace a doctor or pharmacist.
+- For emergencies, advise the user to contact emergency medical services or a licensed healthcare professional.
+
+Keep responses clear, concise and educational.
+
+User question:
+${userPrompt}`;
+
+  try {
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt }] }]
+        }),
+        signal: AbortSignal.timeout(10000)
+      }
+    );
+
+    if (!response.ok) {
+      console.error('Gemini response error:', response.status);
+      return 'I am unable to generate an AI response right now. Please try again.';
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      'I could not generate a response. Please try again.';
+  } catch (error) {
+    console.error('Gemini generation error:', error.message);
+    return 'I am temporarily unable to answer. Please try again later.';
+  }
+};
+
 module.exports = {
   DRUG_MONOGRAPHS,
   extractSearchIntent,
   extractSearchIntentRuleBased,
   calculateRecommendationScore,
-  generateAIResponse
+  generateAIResponse,
+  generateGeminiAnswer
 };

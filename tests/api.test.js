@@ -175,6 +175,25 @@ const runTests = async () => {
     failed++;
   }
 
+  // TEST 6A: General AI Question
+  try {
+    const res = await api('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message: 'What is artificial intelligence?' })
+    });
+
+    if (res.ok && res.data.success && res.data.intent?.intent === 'general' && res.data.aiResponse) {
+      console.log('✅ PASS: AI General Question: Conversational response returned');
+      passed++;
+    } else {
+      console.error('❌ FAIL: General AI question failed');
+      failed++;
+    }
+  } catch (e) {
+    console.error('❌ FAIL: General AI exception:', e.message);
+    failed++;
+  }
+
   // TEST 7: Pharmacy Comparison Matrix
   try {
     const res = await api('/pharmacies/compare?name=Paracetamol&lat=12.9716&lng=77.5946');

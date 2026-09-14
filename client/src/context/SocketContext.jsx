@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { SOCKET_URL } from '../config';
 
 const SocketContext = createContext(null);
 
@@ -10,7 +11,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Connect to backend Socket.IO
-    const newSocket = io(import.meta.env.VITE_API_URL);
+    const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
 
     console.log('🔌 Attempting Socket connection...');
@@ -26,7 +27,7 @@ export const SocketProvider = ({ children }) => {
     if (socket && user) {
       const roomId = user.id || user._id;
       if (roomId) {
-        socket.emit('join_room', roomId);
+        socket.emit('join_user_room', roomId);
         console.log(`🔌 Registered Socket for user room: ${roomId}`);
       }
     }

@@ -27,9 +27,20 @@ export default function ChatDrawer({
   ]);
   const [inputText, setInputText] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   const messagesEndRef = useRef(null);
 
   const isDirectPeerChat = Boolean(chatPartnerId && chatPartnerId !== 'ai');
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => setUserLocation({ latitude: coords.latitude, longitude: coords.longitude }),
+      () => setUserLocation(null),
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+    );
+  }, []);
 
   // Auto-scroll to bottom of conversation
   const scrollToBottom = () => {
@@ -85,7 +96,11 @@ export default function ChatDrawer({
     // AI Assistant Mode
     try {
       setIsAiLoading(true);
-      const res = await aiApi.chat(textToSend);
+      const res = await aiApi.chat(
+        textToSend,
+        userLocation?.latitude,
+        userLocation?.longitude
+      );
       if (res.success) {
         setMessages(prev => [
           ...prev,

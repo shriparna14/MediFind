@@ -45,3 +45,21 @@ npm run dev
 # Start frontend dev server
 cd client && npm run dev
 ```
+
+### 3. Deploy on Render
+
+Create the backend as a Web Service from the repository root, or deploy the
+included `render.yaml` blueprint. Use these settings if configuring it
+manually:
+
+```text
+Root Directory: .
+Build Command: npm run build
+Start Command: npm start
+Health Check Path: /api/health
+```
+
+Set `MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL`, and the Cloudinary/Gemini
+variables in Render's environment settings. For a separately deployed Vite
+frontend, set `VITE_API_URL` to the complete backend URL, for example
+`https://medifind-backend.onrender.com`; do not append `/api` twice.

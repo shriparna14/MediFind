@@ -45,6 +45,15 @@ const createOrder = async (req, res, next) => {
 
     // Verify stock and calculate price atomically
     for (const item of items) {
+      const requestedQty = Number(item.quantity);
+      if (!Number.isInteger(requestedQty) || requestedQty <= 0) {
+        if (session) await session.abortTransaction();
+        return res.status(400).json({
+          success: false,
+          message: 'Item quantity must be a positive integer.'
+        });
+      }
+
       let med = null;
       if (localDb.isUsingMongo()) {
         med = session

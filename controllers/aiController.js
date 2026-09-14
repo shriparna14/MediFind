@@ -1,7 +1,8 @@
 const {
   DRUG_MONOGRAPHS,
   extractSearchIntent,
-  generateAIResponse
+  generateAIResponse,
+  generateGeminiAnswer
 } = require('../services/aiService');
 const { searchMedicinesGrounded } = require('../services/medicineSearchService');
 const { calculateDemandForecast } = require('../utils/demandForecasting');
@@ -29,6 +30,20 @@ const chatWithAI = async (req, res, next) => {
 
     // Async LLM Intent Extraction with fallback
     const intent = await extractSearchIntent(message);
+
+    if (intent.intent === 'general') {
+      const answer = await generateGeminiAnswer(message);
+
+      return res.json({
+        success: true,
+        query: message,
+        intent,
+        aiResponse: answer,
+        medicineInfo: null,
+        data: [],
+        totalMatches: 0
+      });
+    }
 
     // Check for drug monograph match
     let monograph = null;
